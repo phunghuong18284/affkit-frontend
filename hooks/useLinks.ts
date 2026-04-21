@@ -12,6 +12,7 @@ export interface LinkResponse {
   platform: string | null
   tags: string[]
   campaignId: string | null
+  affiliateUrl: string | null
   totalClicks: number
   isDeleted: boolean
   createdAt: string
@@ -22,6 +23,7 @@ interface CreateLinkRequest {
   title?: string
   tags?: string[]
   campaignId?: string | null
+  affiliateUrl?: string
 }
 
 interface UpdateLinkRequest {

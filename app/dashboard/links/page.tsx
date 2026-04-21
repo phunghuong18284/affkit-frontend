@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Copy, Trash2, ExternalLink, Search, Pencil, BarChart2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Copy, Trash2, ExternalLink, Search, Pencil, BarChart2, ChevronLeft, ChevronRight, Zap, Link2, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CreateLinkModal } from '@/components/links/CreateLinkModal'
 import { EditLinkModal } from '@/components/links/EditLinkModal'
-import { useLinks, useDeleteLink, type LinkResponse } from '@/hooks/useLinks'
+import { useLinks, useDeleteLink, useCreateLink, type LinkResponse } from '@/hooks/useLinks'
+import { useConvertLink } from '@/hooks/useConvertLink'
 
 const PAGE_SIZE = 10
 
@@ -21,10 +22,11 @@ function PlatformBadge({ platform }: { platform: string | null }) {
     LAZADA:   'bg-blue-500/20 text-blue-400',
     TIKTOK:   'bg-pink-500/20 text-pink-400',
     FACEBOOK: 'bg-blue-600/20 text-blue-300',
+    TIKI:     'bg-blue-400/20 text-blue-300',
   }
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[platform] ?? 'bg-muted text-muted-foreground'}`}>
-      {platform}
+      {platform.toUpperCase()}
     </span>
   )
 }
@@ -50,9 +52,13 @@ export default function LinksPage() {
   const [page, setPage] = useState(0)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [editingLink, setEditingLink] = useState<LinkResponse | null>(null)
+  const [convertUrl, setConvertUrl] = useState('')
+  const [linkSaved, setLinkSaved] = useState(false)
 
   const { data, isLoading, isError } = useLinks({ search: search || undefined, page, size: PAGE_SIZE })
   const { mutate: deleteLink, isPending: isDeleting } = useDeleteLink()
+  const { mutateAsync: createLink, isPending: isCreating } = useCreateLink()
+  const { convert, isLoading: isConverting, result: convertResult, error: convertError, reset: resetConvert } = useConvertLink()
 
   const links: LinkResponse[] = data?.content ?? data?.items ?? data ?? []
   const totalPages: number = data?.totalPages ?? 1
@@ -63,9 +69,9 @@ export default function LinksPage() {
     setPage(0)
   }
 
-  const handleCopy = (shortUrl: string) => {
-    navigator.clipboard.writeText(shortUrl)
-    toast.success('Copied!')
+  const handleCopy = (url: string) => {
+    navigator.clipboard.writeText(url)
+    toast.success('Da copy!')
   }
 
   const handleDelete = (id: string) => {
@@ -76,6 +82,28 @@ export default function LinksPage() {
     }
     deleteLink(id)
     setConfirmDeleteId(null)
+  }
+
+  const handleConvert = () => {
+    if (!convertUrl.trim()) return
+    convert(convertUrl.trim())
+    setLinkSaved(false)
+  }
+
+  const handleConvertReset = () => {
+    setConvertUrl('')
+    setLinkSaved(false)
+    resetConvert()
+  }
+
+  const handleSaveAsNewLink = async () => {
+    if (!convertResult) return
+    await createLink({
+      originalUrl: convertResult.originalUrl,
+      title: convertResult.platform + ' link',
+      affiliateUrl: convertResult.affiliateUrl,
+    })
+    setLinkSaved(true)
   }
 
   return (
@@ -92,6 +120,83 @@ export default function LinksPage() {
         </Button>
       </div>
 
+      {/* Convert Link Box */}
+      <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Zap size={16} className="text-yellow-400" />
+          <span className="text-sm font-medium text-foreground">Convert sang Affiliate Link</span>
+          <span className="text-xs text-muted-foreground">(Tiki, Lazada, TikTok)</span>
+        </div>
+
+        {!convertResult ? (
+          <div className="flex gap-2">
+            <Input
+              placeholder="Paste link Tiki / Lazada / TikTok vao day..."
+              value={convertUrl}
+              onChange={(e) => {
+                setConvertUrl(e.target.value)
+                if (convertError) resetConvert()
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && handleConvert()}
+              className="flex-1"
+            />
+            <Button
+              onClick={handleConvert}
+              disabled={isConverting || !convertUrl.trim()}
+              className="gap-2 shrink-0"
+            >
+              {isConverting ? (
+                <span className="animate-spin">⟳</span>
+              ) : (
+                <Link2 size={15} />
+              )}
+              {isConverting ? 'Dang convert...' : 'Convert'}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Affiliate URL result */}
+            <div className="flex items-center gap-2 bg-background rounded-md px-3 py-2 border border-border">
+              <PlatformBadge platform={convertResult.platform} />
+              <span className="text-sm text-blue-400 flex-1 truncate">{convertResult.affiliateUrl}</span>
+              <Button
+                size="sm" variant="outline"
+                onClick={() => handleCopy(convertResult.affiliateUrl)}
+                className="shrink-0 gap-1"
+              >
+                <Copy size={13} />
+                Copy
+              </Button>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground truncate max-w-[60%]">
+                Tu: {convertResult.originalUrl}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleSaveAsNewLink}
+                  disabled={isCreating || linkSaved}
+                  className="gap-1 shrink-0"
+                >
+                  <Save size={13} />
+                  {linkSaved ? 'Da luu!' : isCreating ? 'Dang luu...' : 'Luu vao danh sach'}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={handleConvertReset} className="text-xs h-7">
+                  Convert link khac
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {convertError && (
+          <p className="text-xs text-destructive">{convertError}</p>
+        )}
+      </div>
+
       {/* Search */}
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -105,10 +210,11 @@ export default function LinksPage() {
 
       {/* Table */}
       <div className="rounded-lg border border-border overflow-hidden">
-        <div className="grid grid-cols-[1fr_140px_80px_160px] gap-4 px-4 py-2 bg-muted/50 text-xs text-muted-foreground font-medium">
+        <div className="grid grid-cols-[1fr_140px_80px_200px_160px] gap-4 px-4 py-2 bg-muted/50 text-xs text-muted-foreground font-medium">
           <span>LINK</span>
           <span>SHORT URL</span>
           <span>CLICKS</span>
+          <span>AFFILIATE</span>
           <span></span>
         </div>
 
@@ -136,7 +242,7 @@ export default function LinksPage() {
         {links.map((link) => (
           <div
             key={link.id}
-            className="grid grid-cols-[1fr_140px_80px_160px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-muted/30 transition-colors"
+            className="grid grid-cols-[1fr_140px_80px_200px_160px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-muted/30 transition-colors"
           >
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -161,6 +267,30 @@ export default function LinksPage() {
             </div>
 
             <span className="text-sm text-foreground">{link.totalClicks ?? 0}</span>
+
+            {/* Cot Affiliate */}
+            <div className="min-w-0">
+              {link.affiliateUrl ? (
+                <div className="flex items-center gap-1">
+                  <a
+                    href={link.affiliateUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-green-400 truncate hover:underline block max-w-[160px]"
+                  >
+                    {link.affiliateUrl}
+                  </a>
+                  <button
+                    onClick={() => handleCopy(link.affiliateUrl!)}
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <Copy size={12} />
+                  </button>
+                </div>
+              ) : (
+                <span className="text-xs text-muted-foreground">—</span>
+              )}
+            </div>
 
             <div className="flex items-center gap-1 justify-end">
               <Button size="icon" variant="ghost" asChild>
