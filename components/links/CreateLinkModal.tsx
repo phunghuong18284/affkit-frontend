@@ -13,29 +13,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCreateLink } from '@/hooks/useLinks'
+import { useCampaigns } from '@/hooks/useCampaigns'
 
-// ── Schema ─────────────────────────────────────────
 const schema = z.object({
   originalUrl: z.string().url('URL không hợp lệ'),
   title: z.string().optional(),
 })
 type FormData = z.infer<typeof schema>
 
-// ── Props ──────────────────────────────────────────
 interface CreateLinkModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-// ── Component ──────────────────────────────────────
 export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
   const [createdShortUrl, setCreatedShortUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>('none')
+
   const { mutateAsync: createLink, isPending } = useCreateLink()
+  const { data: campaignsData } = useCampaigns()
+  const campaigns = campaignsData?.content ?? campaignsData?.items ?? campaignsData ?? []
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -46,8 +55,8 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
       const result = await createLink({
         originalUrl: data.originalUrl,
         title: data.title || undefined,
+        campaignId: selectedCampaignId !== 'none' ? selectedCampaignId : undefined,
       })
-      // Backend trả shortUrl trong result
       const shortUrl = result?.shortUrl ?? result?.data?.shortUrl
       if (shortUrl) setCreatedShortUrl(shortUrl)
     } catch {
@@ -67,6 +76,7 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
     reset()
     setCreatedShortUrl(null)
     setCopied(false)
+    setSelectedCampaignId('none')
     onOpenChange(false)
   }
 
@@ -77,11 +87,9 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
           <DialogTitle>Tạo link mới</DialogTitle>
         </DialogHeader>
 
-        {/* ── Sau khi tạo thành công ── */}
         {createdShortUrl ? (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Link đã được tạo thành công!</p>
-
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <span className="flex-1 text-sm font-mono truncate">{createdShortUrl}</span>
               <Button size="icon" variant="ghost" onClick={handleCopy}>
@@ -93,16 +101,14 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
                 </a>
               </Button>
             </div>
-
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => { reset(); setCreatedShortUrl(null) }}>
+              <Button variant="outline" onClick={() => { reset(); setCreatedShortUrl(null); setSelectedCampaignId('none') }}>
                 Tạo link khác
               </Button>
               <Button onClick={handleClose}>Xong</Button>
             </div>
           </div>
         ) : (
-          /* ── Form tạo link ── */
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="originalUrl">URL gốc *</Label>
@@ -125,10 +131,25 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label>Campaign (tùy chọn)</Label>
+              <Select value={selectedCampaignId} onValueChange={setSelectedCampaignId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn campaign..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Không có campaign</SelectItem>
+                  {campaigns.map((c: { id: string; name: string }) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={handleClose}>
-                Hủy
-              </Button>
+              <Button type="button" variant="outline" onClick={handleClose}>Hủy</Button>
               <Button type="submit" disabled={isPending}>
                 {isPending ? 'Đang tạo...' : 'Tạo link'}
               </Button>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Copy, Trash2, ExternalLink, Search, Pencil, BarChart2 } from 'lucide-react'
+import { Plus, Copy, Trash2, ExternalLink, Search, Pencil, BarChart2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 
@@ -11,6 +11,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CreateLinkModal } from '@/components/links/CreateLinkModal'
 import { EditLinkModal } from '@/components/links/EditLinkModal'
 import { useLinks, useDeleteLink, type LinkResponse } from '@/hooks/useLinks'
+
+const PAGE_SIZE = 10
 
 function PlatformBadge({ platform }: { platform: string | null }) {
   if (!platform) return null
@@ -45,13 +47,21 @@ export default function LinksPage() {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [editingLink, setEditingLink] = useState<LinkResponse | null>(null)
 
-  const { data, isLoading, isError } = useLinks({ search: search || undefined })
+  const { data, isLoading, isError } = useLinks({ search: search || undefined, page, size: PAGE_SIZE })
   const { mutate: deleteLink, isPending: isDeleting } = useDeleteLink()
 
   const links: LinkResponse[] = data?.content ?? data?.items ?? data ?? []
+  const totalPages: number = data?.totalPages ?? 1
+  const totalElements: number = data?.totalElements ?? links.length
+
+  const handleSearch = (value: string) => {
+    setSearch(value)
+    setPage(0)
+  }
 
   const handleCopy = (shortUrl: string) => {
     navigator.clipboard.writeText(shortUrl)
@@ -89,7 +99,7 @@ export default function LinksPage() {
           placeholder="Tim kiem link..."
           className="pl-9"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => handleSearch(e.target.value)}
         />
       </div>
 
@@ -128,7 +138,6 @@ export default function LinksPage() {
             key={link.id}
             className="grid grid-cols-[1fr_140px_80px_160px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-muted/30 transition-colors"
           >
-            {/* Title + original URL */}
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-foreground truncate">
@@ -141,7 +150,6 @@ export default function LinksPage() {
               </span>
             </div>
 
-            {/* Short URL */}
             <div className="flex items-center gap-1 min-w-0">
               <span className="text-xs text-blue-400 truncate">{link.shortUrl ?? link.shortCode}</span>
               <button
@@ -152,35 +160,22 @@ export default function LinksPage() {
               </button>
             </div>
 
-            {/* Clicks */}
             <span className="text-sm text-foreground">{link.totalClicks ?? 0}</span>
 
-            {/* Actions */}
             <div className="flex items-center gap-1 justify-end">
               <Button size="icon" variant="ghost" asChild>
                 <a href={link.shortUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink size={15} />
                 </a>
               </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => router.push(`/dashboard/links/${link.id}`)}
-                title="View analytics"
-              >
+              <Button size="icon" variant="ghost" onClick={() => router.push(`/dashboard/links/${link.id}`)}>
                 <BarChart2 size={15} />
               </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setEditingLink(link)}
-              >
+              <Button size="icon" variant="ghost" onClick={() => setEditingLink(link)}>
                 <Pencil size={15} />
               </Button>
               <Button
-                size="icon"
-                variant="ghost"
-                disabled={isDeleting}
+                size="icon" variant="ghost" disabled={isDeleting}
                 onClick={() => handleDelete(link.id)}
                 className={confirmDeleteId === link.id ? 'text-destructive hover:text-destructive' : ''}
               >
@@ -194,7 +189,30 @@ export default function LinksPage() {
         ))}
       </div>
 
-      {/* Modals */}
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>{totalElements} links</span>
+          <div className="flex items-center gap-2">
+            <Button
+              size="icon" variant="outline" disabled={page === 0}
+              onClick={() => setPage(p => p - 1)}
+            >
+              <ChevronLeft size={15} />
+            </Button>
+            <span className="text-xs px-2">
+              Trang {page + 1} / {totalPages}
+            </span>
+            <Button
+              size="icon" variant="outline" disabled={page >= totalPages - 1}
+              onClick={() => setPage(p => p + 1)}
+            >
+              <ChevronRight size={15} />
+            </Button>
+          </div>
+        </div>
+      )}
+
       <CreateLinkModal open={modalOpen} onOpenChange={setModalOpen} />
       <EditLinkModal
         link={editingLink}

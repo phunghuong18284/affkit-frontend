@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Link2, MousePointerClick, Calendar, ChevronRight } from 'lucide-react'
+import { Plus, Trash2, Link2, MousePointerClick, Calendar, ChevronRight, ChevronLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CreateCampaignModal } from '@/components/campaigns/CreateCampaignModal'
 import { useCampaigns, useDeleteCampaign, type CampaignResponse, type CampaignStatus } from '@/hooks/useCampaigns'
+
+const PAGE_SIZE = 9
 
 function StatusBadge({ status }: { status: CampaignStatus }) {
   const map = {
@@ -44,12 +46,15 @@ function CampaignCardSkeleton() {
 export default function CampaignsPage() {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
+  const [page, setPage] = useState(0)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
-  const { data, isLoading, isError } = useCampaigns()
+  const { data, isLoading, isError } = useCampaigns({ page, size: PAGE_SIZE })
   const { mutate: deleteCampaign, isPending: isDeleting } = useDeleteCampaign()
 
   const campaigns: CampaignResponse[] = data?.content ?? data?.items ?? data ?? []
+  const totalPages: number = data?.totalPages ?? 1
+  const totalElements: number = data?.totalElements ?? campaigns.length
 
   const handleDelete = (id: string) => {
     if (confirmDeleteId !== id) {
@@ -91,9 +96,7 @@ export default function CampaignsPage() {
       {!isLoading && !isError && campaigns.length === 0 && (
         <div className="text-center py-16 border border-dashed border-border rounded-lg">
           <p className="text-muted-foreground text-sm">No campaigns yet.</p>
-          <p className="text-muted-foreground text-xs mt-1">
-            Click Tao campaign to start
-          </p>
+          <p className="text-muted-foreground text-xs mt-1">Click Tao campaign to start</p>
         </div>
       )}
 
@@ -106,9 +109,7 @@ export default function CampaignsPage() {
               onClick={() => router.push(`/dashboard/campaigns/${campaign.id}`)}
             >
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-sm font-semibold text-foreground leading-snug">
-                  {campaign.name}
-                </h3>
+                <h3 className="text-sm font-semibold text-foreground leading-snug">{campaign.name}</h3>
                 <div className="flex items-center gap-1">
                   <StatusBadge status={campaign.status} />
                   <ChevronRight size={14} className="text-muted-foreground" />
@@ -116,9 +117,7 @@ export default function CampaignsPage() {
               </div>
 
               {campaign.description && (
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {campaign.description}
-                </p>
+                <p className="text-xs text-muted-foreground line-clamp-2">{campaign.description}</p>
               )}
 
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -142,13 +141,8 @@ export default function CampaignsPage() {
                   <span className="text-xs text-destructive">Click again to delete</span>
                 )}
                 <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={isDeleting}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDelete(campaign.id)
-                  }}
+                  size="sm" variant="ghost" disabled={isDeleting}
+                  onClick={(e) => { e.stopPropagation(); handleDelete(campaign.id) }}
                   className={`gap-1 text-xs ${confirmDeleteId === campaign.id ? 'text-destructive hover:text-destructive' : 'text-muted-foreground'}`}
                 >
                   <Trash2 size={13} />
@@ -157,6 +151,30 @@ export default function CampaignsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>{totalElements} campaigns</span>
+          <div className="flex items-center gap-2">
+            <Button
+              size="icon" variant="outline" disabled={page === 0}
+              onClick={() => setPage(p => p - 1)}
+            >
+              <ChevronLeft size={15} />
+            </Button>
+            <span className="text-xs px-2">
+              Trang {page + 1} / {totalPages}
+            </span>
+            <Button
+              size="icon" variant="outline" disabled={page >= totalPages - 1}
+              onClick={() => setPage(p => p + 1)}
+            >
+              <ChevronRight size={15} />
+            </Button>
+          </div>
         </div>
       )}
 

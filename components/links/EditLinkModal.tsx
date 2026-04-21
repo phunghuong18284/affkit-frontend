@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -11,40 +11,45 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useUpdateLink, type LinkResponse } from '@/hooks/useLinks'
+import { useCampaigns } from '@/hooks/useCampaigns'
 
-// ── Schema ─────────────────────────────────────────
 const schema = z.object({
-  originalUrl: z.string().url('URL không hợp lệ'),
   title: z.string().optional(),
 })
 type FormData = z.infer<typeof schema>
 
-// ── Props ──────────────────────────────────────────
 interface EditLinkModalProps {
   link: LinkResponse | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-// ── Component ──────────────────────────────────────
 export function EditLinkModal({ link, open, onOpenChange }: EditLinkModalProps) {
   const { mutateAsync: updateLink, isPending } = useUpdateLink()
+  const { data: campaignsData } = useCampaigns()
+  const campaigns = campaignsData?.content ?? campaignsData?.items ?? campaignsData ?? []
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>('none')
+
+  const { register, handleSubmit, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
-  // Pre-fill form khi mở modal
   useEffect(() => {
     if (link) {
-      reset({
-        originalUrl: link.originalUrl,
-        title: link.title ?? '',
-      })
+      reset({ title: link.title ?? '' })
+      setSelectedCampaignId(link.campaignId ?? 'none')
     }
   }, [link, reset])
 
@@ -54,8 +59,8 @@ export function EditLinkModal({ link, open, onOpenChange }: EditLinkModalProps) 
       await updateLink({
         id: link.id,
         data: {
-          originalUrl: data.originalUrl,
           title: data.title || undefined,
+          campaignId: selectedCampaignId !== 'none' ? selectedCampaignId : undefined,
         },
       })
       onOpenChange(false)
@@ -66,6 +71,7 @@ export function EditLinkModal({ link, open, onOpenChange }: EditLinkModalProps) 
 
   const handleClose = () => {
     reset()
+    setSelectedCampaignId('none')
     onOpenChange(false)
   }
 
@@ -78,15 +84,8 @@ export function EditLinkModal({ link, open, onOpenChange }: EditLinkModalProps) 
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="originalUrl">URL gốc *</Label>
-            <Input
-              id="originalUrl"
-              placeholder="https://shopee.vn/product/..."
-              {...register('originalUrl')}
-            />
-            {errors.originalUrl && (
-              <p className="text-xs text-destructive">{errors.originalUrl.message}</p>
-            )}
+            <Label>URL gốc</Label>
+            <p className="text-sm text-muted-foreground break-all">{link?.originalUrl}</p>
           </div>
 
           <div className="space-y-2">
@@ -98,10 +97,25 @@ export function EditLinkModal({ link, open, onOpenChange }: EditLinkModalProps) 
             />
           </div>
 
+          <div className="space-y-2">
+            <Label>Campaign (tùy chọn)</Label>
+            <Select value={selectedCampaignId} onValueChange={setSelectedCampaignId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn campaign..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Không có campaign</SelectItem>
+                {campaigns.map((c: { id: string; name: string }) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Hủy
-            </Button>
+            <Button type="button" variant="outline" onClick={handleClose}>Hủy</Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? 'Đang lưu...' : 'Lưu thay đổi'}
             </Button>

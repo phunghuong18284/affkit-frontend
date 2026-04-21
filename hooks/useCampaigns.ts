@@ -25,18 +25,23 @@ interface CreateCampaignRequest {
   endDate?: string | null
 }
 
+interface CampaignListParams {
+  page?: number
+  size?: number
+}
+
 // ── Query Keys ─────────────────────────────────────
 export const campaignKeys = {
   all: ['campaigns'] as const,
-  list: () => ['campaigns', 'list'] as const,
+  list: (params?: CampaignListParams) => ['campaigns', 'list', params] as const,
 }
 
 // ── Hooks ──────────────────────────────────────────
-export function useCampaigns() {
+export function useCampaigns(params: CampaignListParams = {}) {
   return useQuery({
-    queryKey: campaignKeys.list(),
+    queryKey: campaignKeys.list(params),
     queryFn: async () => {
-      const res = await api.get('/campaigns')
+      const res = await api.get('/campaigns', { params })
       return res.data ?? res
     },
     staleTime: 30_000,
