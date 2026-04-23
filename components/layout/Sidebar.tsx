@@ -4,17 +4,18 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Link2, Calendar,
-  BarChart2, Settings, LogOut,
+  BarChart2, Settings, LogOut, Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 
 const NAV_ITEMS = [
   { href: '/dashboard',           icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/dashboard/links',     icon: Link2,            label: 'Links' },
-  { href: '/dashboard/campaigns', icon: Calendar,         label: 'Campaigns' },
-  { href: '/dashboard/analytics', icon: BarChart2,        label: 'Analytics' },
-  { href: '/dashboard/settings',  icon: Settings,         label: 'Cài đặt' },
+  { href: '/dashboard/links',     icon: Link2,           label: 'Links' },
+  { href: '/dashboard/campaigns', icon: Calendar,        label: 'Campaigns' },
+  { href: '/dashboard/analytics', icon: BarChart2,       label: 'Analytics' },
+  { href: '/dashboard/posts',     icon: Sparkles,        label: 'Deal Posts' },
+  { href: '/dashboard/settings',  icon: Settings,        label: 'Cài đặt' },
 ]
 
 export function Sidebar() {
