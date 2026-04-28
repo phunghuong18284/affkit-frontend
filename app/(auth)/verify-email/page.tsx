@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
@@ -14,6 +14,7 @@ export default function VerifyEmailPage() {
   const router = useRouter()
   const token = searchParams.get('token')
   const { login } = useAuthStore()
+  const calledRef = useRef(false)
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
@@ -25,23 +26,43 @@ export default function VerifyEmailPage() {
       return
     }
 
+    if (calledRef.current) return
+    calledRef.current = true
+
     api.get(`/auth/verify-email?token=${token}`)
       .then((res: any) => {
-        // Auto login nếu backend trả accessToken
-        if (res?.accessToken) {
-          login({ email: res.email } as any, res.accessToken)
+        const accessToken = res?.accessToken
+        if (accessToken) {
+          const user = {
+            id: res?.id ?? '',
+            email: res?.email ?? '',
+            fullName: res?.fullName ?? '',
+            plan: res?.plan ?? 'FREE',
+            isVerified: true,
+            createdAt: res?.createdAt ?? '',
+          }
+          login(user, accessToken)
+          setStatus('success')
+          setMessage('Email đã được xác nhận thành công!')
           setTimeout(() => router.push('/dashboard'), 2000)
         } else {
-          setTimeout(() => router.push('/login'), 3000)
+          setStatus('success')
+          setMessage('Email đã được xác nhận thành công!')
+          setTimeout(() => router.push('/login'), 2000)
         }
-        setStatus('success')
-        setMessage('Email đã được xác nhận thành công!')
       })
       .catch((err: any) => {
         setStatus('error')
-        setMessage(err?.message ?? 'Token đã hết hạn hoặc không hợp lệ.')
+        const code = err?.code ?? err?.errorCode
+        if (code === 'TOKEN_EXPIRED') {
+          setMessage('Link xác nhận đã hết hạn. Vui lòng yêu cầu gửi lại email.')
+        } else if (code === 'TOKEN_INVALID') {
+          setMessage('Link xác nhận không hợp lệ hoặc đã được dùng rồi.')
+        } else {
+          setMessage('Có lỗi xảy ra. Vui lòng thử lại.')
+        }
       })
-  }, [token, router])
+  }, [token])
 
   return (
     <Card className="border-border bg-card text-center">
@@ -60,11 +81,9 @@ export default function VerifyEmailPage() {
           <>
             <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
             <p className="text-foreground font-medium">{message}</p>
-            <p className="text-sm text-muted-foreground">
-              Đang chuyển hướng...
-            </p>
+            <p className="text-sm text-muted-foreground">Đang chuyển hướng...</p>
             <Button asChild className="w-full">
-              <Link href="/login">Đăng nhập ngay</Link>
+              <Link href="/dashboard">Vào Dashboard</Link>
             </Button>
           </>
         )}
