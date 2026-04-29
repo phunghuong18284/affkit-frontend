@@ -20,7 +20,7 @@ export function useAuth(redirectTo: string = '/dashboard') {
       const user = {
         id: payload.sub,
         email: payload.email,
-        fullName: payload.email,
+        fullName: payload.fullName ?? payload.email,
         plan: payload.plan ?? 'FREE',
         isVerified: true,
         createdAt: new Date().toISOString(),
@@ -29,14 +29,15 @@ export function useAuth(redirectTo: string = '/dashboard') {
       router.push(redirectTo)
     },
     onError: (error: any) => {
+      console.log('login error:', JSON.stringify(error))
       const code = error?.code
       if (code === 'ACCOUNT_LOCKED') {
-        toast.error('Tai khoan tam thoi bi khoa. Thu lai sau.')
-      } else if (code === 'EMAIL_NOT_VERIFIED') {
-        toast.error('Email chua xac nhan.')
+        toast.error('Tài khoản tạm thời bị khóa. Thử lại sau.')
+      } else if (code === 'ACCOUNT_NOT_VERIFIED') {
+        toast.error('Email chưa được xác nhận.')
         router.push('/resend-verification')
       } else {
-        toast.error('Sai email hoac mat khau')
+        toast.error('Sai email hoặc mật khẩu')
       }
     },
   })
@@ -45,11 +46,11 @@ export function useAuth(redirectTo: string = '/dashboard') {
     mutationFn: (data: { email: string; fullName: string; password: string }) =>
       api.post('/auth/register', data),
     onSuccess: () => {
-      toast.success('Dang ky thanh cong! Vui long kiem tra email.')
+      toast.success('Đăng ký thành công! Vui lòng kiểm tra email.')
       router.push('/login')
     },
     onError: (error: any) => {
-      toast.error(error?.message ?? 'Dang ky that bai')
+      toast.error(error?.message ?? 'Đăng ký thất bại')
     },
   })
 

@@ -55,7 +55,7 @@ function RegisterFormWrapper({ onSuccess }: { onSuccess: (email: string) => void
       })
       onSuccess(data.email)
     } catch (err: any) {
-      const msg = err?.response?.data?.error?.message
+      const msg = err?.message ?? err?.response?.data?.error?.message
       toast.error(msg ?? 'Đăng ký thất bại. Thử lại sau.')
     } finally {
       setIsSubmitting(false)
@@ -165,8 +165,9 @@ function ConfirmScreen({ email }: { email: string }) {
     try {
       await api.post('/auth/resend-verification', { email })
       toast.success('Đã gửi lại email xác nhận')
-    } catch {
-      toast.error('Thử lại sau')
+    } catch (err: any) {
+      const msg = err?.message ?? err?.response?.data?.error?.message
+      toast.error(msg ?? 'Thử lại sau')
     } finally {
       setResending(false)
     }
