@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Link2, MousePointerClick, Calendar, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Plus, Trash2, Link2, MousePointerClick, Calendar, ChevronRight, ChevronLeft, Pencil } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CreateCampaignModal } from '@/components/campaigns/CreateCampaignModal'
+import { EditCampaignModal } from '@/components/campaigns/EditCampaignModal'
 import { useCampaigns, useDeleteCampaign, type CampaignResponse, type CampaignStatus } from '@/hooks/useCampaigns'
 
 const PAGE_SIZE = 9
@@ -46,6 +46,8 @@ function CampaignCardSkeleton() {
 export default function CampaignsPage() {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingCampaign, setEditingCampaign] = useState<CampaignResponse | null>(null)
   const [page, setPage] = useState(0)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
@@ -64,6 +66,12 @@ export default function CampaignsPage() {
     }
     deleteCampaign(id)
     setConfirmDeleteId(null)
+  }
+
+  const handleEdit = (e: React.MouseEvent, campaign: CampaignResponse) => {
+    e.stopPropagation()
+    setEditingCampaign(campaign)
+    setEditModalOpen(true)
   }
 
   return (
@@ -141,6 +149,14 @@ export default function CampaignsPage() {
                   <span className="text-xs text-destructive">Click again to delete</span>
                 )}
                 <Button
+                  size="sm" variant="ghost"
+                  onClick={(e) => handleEdit(e, campaign)}
+                  className="gap-1 text-xs text-muted-foreground"
+                >
+                  <Pencil size={13} />
+                  Edit
+                </Button>
+                <Button
                   size="sm" variant="ghost" disabled={isDeleting}
                   onClick={(e) => { e.stopPropagation(); handleDelete(campaign.id) }}
                   className={`gap-1 text-xs ${confirmDeleteId === campaign.id ? 'text-destructive hover:text-destructive' : 'text-muted-foreground'}`}
@@ -154,24 +170,15 @@ export default function CampaignsPage() {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>{totalElements} campaigns</span>
           <div className="flex items-center gap-2">
-            <Button
-              size="icon" variant="outline" disabled={page === 0}
-              onClick={() => setPage(p => p - 1)}
-            >
+            <Button size="icon" variant="outline" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
               <ChevronLeft size={15} />
             </Button>
-            <span className="text-xs px-2">
-              Trang {page + 1} / {totalPages}
-            </span>
-            <Button
-              size="icon" variant="outline" disabled={page >= totalPages - 1}
-              onClick={() => setPage(p => p + 1)}
-            >
+            <span className="text-xs px-2">Trang {page + 1} / {totalPages}</span>
+            <Button size="icon" variant="outline" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
               <ChevronRight size={15} />
             </Button>
           </div>
@@ -179,6 +186,11 @@ export default function CampaignsPage() {
       )}
 
       <CreateCampaignModal open={modalOpen} onOpenChange={setModalOpen} />
+      <EditCampaignModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        campaign={editingCampaign}
+      />
     </div>
   )
 }

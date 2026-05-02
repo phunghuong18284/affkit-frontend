@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 
-// ── Types ──────────────────────────────────────────
 export interface LinkResponse {
   id: string
   originalUrl: string
@@ -39,13 +38,11 @@ interface LinkListParams {
   search?: string
 }
 
-// ── Query Keys ─────────────────────────────────────
 export const linkKeys = {
   all: ['links'] as const,
   list: (params: LinkListParams) => ['links', 'list', params] as const,
 }
 
-// ── Hooks ──────────────────────────────────────────
 export function useLinks(params: LinkListParams = {}) {
   return useQuery({
     queryKey: linkKeys.list(params),
@@ -67,10 +64,12 @@ export function useCreateLink() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: linkKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
       toast.success('Tạo link thành công!')
     },
-    onError: () => {
-      toast.error('Tạo link thất bại. Vui lòng thử lại.')
+    onError: (err: any) => {
+      const msg = err?.message ?? 'Tạo link thất bại. Vui lòng thử lại.'
+      toast.error(msg)
     },
   })
 }
@@ -84,6 +83,7 @@ export function useDeleteLink() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: linkKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
       toast.success('Đã xóa link')
     },
     onError: () => {
@@ -102,6 +102,7 @@ export function useUpdateLink() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: linkKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
       toast.success('Cập nhật link thành công!')
     },
     onError: () => {

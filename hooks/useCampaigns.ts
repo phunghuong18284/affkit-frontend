@@ -58,10 +58,28 @@ export function useCreateCampaign() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: campaignKeys.all })
-      toast.success('Tạo campaign thành công!')
+      toast.success('Tao campaign thanh cong!')
     },
     onError: () => {
-      toast.error('Tạo campaign thất bại. Vui lòng thử lại.')
+      toast.error('Tao campaign that bai. Vui long thu lai.')
+    },
+  })
+}
+
+export function useUpdateCampaign() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<CreateCampaignRequest> }) => {
+      const res = await api.patch(`/campaigns/${id}`, data)
+      return res.data ?? res
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: campaignKeys.all })
+      toast.success('Cap nhat campaign thanh cong!')
+    },
+    onError: () => {
+      toast.error('Cap nhat campaign that bai.')
     },
   })
 }
@@ -75,10 +93,10 @@ export function useDeleteCampaign() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: campaignKeys.all })
-      toast.success('Đã xóa campaign')
+      toast.success('Da xoa campaign')
     },
     onError: () => {
-      toast.error('Xóa campaign thất bại')
+      toast.error('Xoa campaign that bai')
     },
   })
 }

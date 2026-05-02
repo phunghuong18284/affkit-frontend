@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CreateLinkModal } from '@/components/links/CreateLinkModal'
 import { EditLinkModal } from '@/components/links/EditLinkModal'
+import { PlanLimitBanner } from '@/components/layout/PlanLimitBanner'
 import { useLinks, useDeleteLink, useCreateLink, type LinkResponse } from '@/hooks/useLinks'
 import { useConvertLink } from '@/hooks/useConvertLink'
 
@@ -120,6 +121,9 @@ export default function LinksPage() {
         </Button>
       </div>
 
+      {/* Plan Limit Banner */}
+      <PlanLimitBanner />
+
       {/* Convert Link Box */}
       <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3">
         <div className="flex items-center gap-2">
@@ -155,7 +159,6 @@ export default function LinksPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {/* Affiliate URL result */}
             <div className="flex items-center gap-2 bg-background rounded-md px-3 py-2 border border-border">
               <PlatformBadge platform={convertResult.platform} />
               <span className="text-sm text-blue-400 flex-1 truncate">{convertResult.affiliateUrl}</span>
@@ -169,7 +172,6 @@ export default function LinksPage() {
               </Button>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground truncate max-w-[60%]">
                 Tu: {convertResult.originalUrl}
@@ -268,7 +270,6 @@ export default function LinksPage() {
 
             <span className="text-sm text-foreground">{link.totalClicks ?? 0}</span>
 
-            {/* Cot Affiliate */}
             <div className="min-w-0">
               {link.affiliateUrl ? (
                 <div className="flex items-center gap-1">

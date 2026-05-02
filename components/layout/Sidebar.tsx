@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Link2, Calendar,
-  BarChart2, Settings, LogOut, Sparkles,
+  BarChart2, Settings, LogOut, Sparkles, CreditCard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/campaigns', icon: Calendar,        label: 'Campaigns' },
   { href: '/dashboard/analytics', icon: BarChart2,       label: 'Analytics' },
   { href: '/dashboard/posts',     icon: Sparkles,        label: 'Deal Posts' },
+  { href: '/dashboard/billing',   icon: CreditCard,      label: 'Billing' },
   { href: '/dashboard/settings',  icon: Settings,        label: 'Cài đặt' },
 ]
 
