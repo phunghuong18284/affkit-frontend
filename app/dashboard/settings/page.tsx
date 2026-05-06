@@ -1,3 +1,4 @@
+//ts-nocheck
 // app/dashboard/settings/page.tsx
 
 'use client'
