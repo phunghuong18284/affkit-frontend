@@ -66,7 +66,7 @@ export default function SettingsPage() {
   })
 
   async function onUpdateProfile(data: ProfileForm) {
-    await updateProfile.mutateAsync(data)
+    await updateProfile.mutateAsync(data as any)
   }
 
   async function onChangePassword(data: PasswordForm) {
