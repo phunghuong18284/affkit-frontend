@@ -2,7 +2,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/store/authStore'
 
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api/v1`,
   withCredentials: true,
   timeout: 10_000,
   headers: {
@@ -49,7 +49,7 @@ api.interceptors.response.use(
       isRefreshing = true
       try {
         const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/refresh`,
           {},
           { withCredentials: true }
         )
