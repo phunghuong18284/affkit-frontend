@@ -4,7 +4,7 @@ import './globals.css'
 import { Providers } from '@/components/common/Providers'
 import { Toaster } from 'sonner'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin', 'vietnamese'] })
 
 export const metadata: Metadata = {
   title: 'AffKit — Rút gọn & theo dõi link affiliate',
