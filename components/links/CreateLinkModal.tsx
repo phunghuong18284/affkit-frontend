@@ -28,7 +28,7 @@ import { useCreateLink } from '@/hooks/useLinks'
 import { useCampaigns } from '@/hooks/useCampaigns'
 
 const schema = z.object({
-  originalUrl: z.string().url('URL không hợp lệ'),
+  originalUrl: z.string().url('URL khong hop le'),
   title: z.string().optional(),
 })
 type FormData = z.infer<typeof schema>
@@ -47,7 +47,12 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
   const { data: campaignsData } = useCampaigns()
   const campaigns = campaignsData?.content ?? campaignsData?.items ?? campaignsData ?? []
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
@@ -61,7 +66,7 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
       const shortUrl = result?.shortUrl ?? result?.data?.shortUrl
       if (shortUrl) setCreatedShortUrl(shortUrl)
     } catch {
-      // lỗi đã handle trong hook
+      // loi da handle trong hook
     }
   }
 
@@ -69,7 +74,7 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
     if (!createdShortUrl) return
     navigator.clipboard.writeText(createdShortUrl)
     setCopied(true)
-    toast.success('Đã copy link!')
+    toast.success('Da copy link!')
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -83,14 +88,14 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md z-[100]">
         <DialogHeader>
-          <DialogTitle>Tạo link mới</DialogTitle>
+          <DialogTitle>Tao link moi</DialogTitle>
         </DialogHeader>
 
         {createdShortUrl ? (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Link đã được tạo thành công!</p>
+            <p className="text-sm text-muted-foreground">Link da duoc tao thanh cong!</p>
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <span className="flex-1 text-sm font-mono truncate">{createdShortUrl}</span>
               <Button size="icon" variant="ghost" onClick={handleCopy}>
@@ -103,8 +108,15 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
               </Button>
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => { reset(); setCreatedShortUrl(null); setSelectedCampaignId('none') }}>
-                Tạo link khác
+              <Button
+                variant="outline"
+                onClick={() => {
+                  reset()
+                  setCreatedShortUrl(null)
+                  setSelectedCampaignId('none')
+                }}
+              >
+                Tao link khac
               </Button>
               <Button onClick={handleClose}>Xong</Button>
             </div>
@@ -112,7 +124,7 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="originalUrl">URL gốc *</Label>
+              <Label htmlFor="originalUrl">URL goc *</Label>
               <Input
                 id="originalUrl"
                 placeholder="https://shopee.vn/product/..."
@@ -124,22 +136,26 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="title">Tiêu đề (tùy chọn)</Label>
+              <Label htmlFor="title">Tieu de (tuy chon)</Label>
               <Input
                 id="title"
-                placeholder="Ví dụ: Áo thun sale 50%"
+                placeholder="Vi du: Ao thun sale 50%"
                 {...register('title')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Campaign (tùy chọn)</Label>
+              <Label>Campaign (tuy chon)</Label>
               <Select value={selectedCampaignId} onValueChange={setSelectedCampaignId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Chọn campaign..." />
+                  <SelectValue placeholder="Chon campaign..." />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Không có campaign</SelectItem>
+                <SelectContent
+                  className="z-[200]"
+                  position="popper"
+                  sideOffset={4}
+                >
+                  <SelectItem value="none">Khong co campaign</SelectItem>
                   {campaigns.map((c: { id: string; name: string }) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
@@ -150,9 +166,11 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
             </div>
 
             <div className="flex gap-2 justify-end">
-              <Button type="button" variant="outline" onClick={handleClose}>Hủy</Button>
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Huy
+              </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? 'Đang tạo...' : 'Tạo link'}
+                {isPending ? 'Dang tao...' : 'Tao link'}
               </Button>
             </div>
           </form>
