@@ -10,12 +10,12 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 
 const NAV_ITEMS = [
-  { href: '/dashboard',           icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/dashboard',           icon: LayoutDashboard, label: 'Tổng quan' },
   { href: '/dashboard/links',     icon: Link2,           label: 'Links' },
-  { href: '/dashboard/campaigns', icon: Calendar,        label: 'Campaigns' },
-  { href: '/dashboard/analytics', icon: BarChart2,       label: 'Analytics' },
-  { href: '/dashboard/posts',     icon: Sparkles,        label: 'Deal Posts' },
-  { href: '/dashboard/billing',   icon: CreditCard,      label: 'Billing' },
+  { href: '/dashboard/campaigns', icon: Calendar,        label: 'Chiến dịch' },
+  { href: '/dashboard/analytics', icon: BarChart2,       label: 'Thống kê' },
+  { href: '/dashboard/posts',     icon: Sparkles,        label: 'Bài đăng deals' },
+  { href: '/dashboard/billing',   icon: CreditCard,      label: 'Thanh toán' },
   { href: '/dashboard/settings',  icon: Settings,        label: 'Cài đặt' },
 ]
 

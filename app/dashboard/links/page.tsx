@@ -72,7 +72,7 @@ export default function LinksPage() {
 
   const handleCopy = (url: string) => {
     navigator.clipboard.writeText(url)
-    toast.success('Da copy!')
+    toast.success('Đã copy!')
   }
 
   const handleDelete = (id: string) => {
@@ -109,22 +109,19 @@ export default function LinksPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-foreground">Links</h2>
-          <p className="text-sm text-muted-foreground">Quan ly link rut gon cua ban</p>
+          <p className="text-sm text-muted-foreground">Quản lý link rút gọn của bạn</p>
         </div>
         <Button className="gap-2" onClick={() => setModalOpen(true)}>
           <Plus size={16} />
-          Tao link moi
+          Tạo link mới
         </Button>
       </div>
 
-      {/* Plan Limit Banner */}
       <PlanLimitBanner />
 
-      {/* Convert Link Box */}
       <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Zap size={16} className="text-yellow-400" />
@@ -135,7 +132,7 @@ export default function LinksPage() {
         {!convertResult ? (
           <div className="flex gap-2">
             <Input
-              placeholder="Paste link Tiki / Lazada / TikTok vao day..."
+              placeholder="Dán link Tiki / Lazada / TikTok vào đây..."
               value={convertUrl}
               onChange={(e) => {
                 setConvertUrl(e.target.value)
@@ -149,12 +146,8 @@ export default function LinksPage() {
               disabled={isConverting || !convertUrl.trim()}
               className="gap-2 shrink-0"
             >
-              {isConverting ? (
-                <span className="animate-spin">⟳</span>
-              ) : (
-                <Link2 size={15} />
-              )}
-              {isConverting ? 'Dang convert...' : 'Convert'}
+              {isConverting ? <span className="animate-spin">⟳</span> : <Link2 size={15} />}
+              {isConverting ? 'Đang convert...' : 'Convert'}
             </Button>
           </div>
         ) : (
@@ -162,82 +155,62 @@ export default function LinksPage() {
             <div className="flex items-center gap-2 bg-background rounded-md px-3 py-2 border border-border">
               <PlatformBadge platform={convertResult.platform} />
               <span className="text-sm text-blue-400 flex-1 truncate">{convertResult.affiliateUrl}</span>
-              <Button
-                size="sm" variant="outline"
-                onClick={() => handleCopy(convertResult.affiliateUrl)}
-                className="shrink-0 gap-1"
-              >
+              <Button size="sm" variant="outline" onClick={() => handleCopy(convertResult.affiliateUrl)} className="shrink-0 gap-1">
                 <Copy size={13} />
                 Copy
               </Button>
             </div>
-
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground truncate max-w-[60%]">
-                Tu: {convertResult.originalUrl}
+                Từ: {convertResult.originalUrl}
               </span>
               <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  onClick={handleSaveAsNewLink}
-                  disabled={isCreating || linkSaved}
-                  className="gap-1 shrink-0"
-                >
+                <Button size="sm" onClick={handleSaveAsNewLink} disabled={isCreating || linkSaved} className="gap-1 shrink-0">
                   <Save size={13} />
-                  {linkSaved ? 'Da luu!' : isCreating ? 'Dang luu...' : 'Luu vao danh sach'}
+                  {linkSaved ? 'Đã lưu!' : isCreating ? 'Đang lưu...' : 'Lưu vào danh sách'}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={handleConvertReset} className="text-xs h-7">
-                  Convert link khac
+                  Convert link khác
                 </Button>
               </div>
             </div>
           </div>
         )}
 
-        {convertError && (
-          <p className="text-xs text-destructive">{convertError}</p>
-        )}
+        {convertError && <p className="text-xs text-destructive">{convertError}</p>}
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Tim kiem link..."
+          placeholder="Tìm kiếm link..."
           className="pl-9"
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
         />
       </div>
 
-      {/* Table */}
       <div className="rounded-lg border border-border overflow-hidden">
         <div className="grid grid-cols-[1fr_140px_80px_200px_160px] gap-4 px-4 py-2 bg-muted/50 text-xs text-muted-foreground font-medium">
           <span>LINK</span>
           <span>SHORT URL</span>
-          <span>CLICKS</span>
+          <span>LƯỢT CLICK</span>
           <span>AFFILIATE</span>
           <span></span>
         </div>
 
-        {isLoading && (
-          <>
-            <LinkRowSkeleton />
-            <LinkRowSkeleton />
-            <LinkRowSkeleton />
-          </>
-        )}
+        {isLoading && <><LinkRowSkeleton /><LinkRowSkeleton /><LinkRowSkeleton /></>}
 
         {isError && (
           <div className="text-center py-12 text-sm text-destructive">
-            Cannot load links. Please try again.
+            Không thể tải danh sách link. Vui lòng thử lại.
           </div>
         )}
 
         {!isLoading && !isError && links.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-muted-foreground text-sm">No links yet.</p>
-            <p className="text-muted-foreground text-xs mt-1">Click "+ Tao link moi" to start</p>
+            <p className="text-muted-foreground text-sm">Chưa có link nào.</p>
+            <p className="text-muted-foreground text-xs mt-1">Nhấn "+ Tạo link mới" để bắt đầu</p>
           </div>
         )}
 
@@ -249,21 +222,16 @@ export default function LinksPage() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-foreground truncate">
-                  {link.title ?? 'No title'}
+                  {link.title ?? 'Chưa có tiêu đề'}
                 </span>
                 <PlatformBadge platform={link.platform} />
               </div>
-              <span className="text-xs text-muted-foreground truncate block">
-                {link.originalUrl}
-              </span>
+              <span className="text-xs text-muted-foreground truncate block">{link.originalUrl}</span>
             </div>
 
             <div className="flex items-center gap-1 min-w-0">
               <span className="text-xs text-blue-400 truncate">{link.shortUrl ?? link.shortCode}</span>
-              <button
-                onClick={() => handleCopy(link.shortUrl)}
-                className="shrink-0 text-muted-foreground hover:text-foreground"
-              >
+              <button onClick={() => handleCopy(link.shortUrl)} className="shrink-0 text-muted-foreground hover:text-foreground">
                 <Copy size={13} />
               </button>
             </div>
@@ -273,18 +241,10 @@ export default function LinksPage() {
             <div className="min-w-0">
               {link.affiliateUrl ? (
                 <div className="flex items-center gap-1">
-                  <a
-                    href={link.affiliateUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-green-400 truncate hover:underline block max-w-[160px]"
-                  >
+                  <a href={link.affiliateUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-green-400 truncate hover:underline block max-w-[160px]">
                     {link.affiliateUrl}
                   </a>
-                  <button
-                    onClick={() => handleCopy(link.affiliateUrl!)}
-                    className="shrink-0 text-muted-foreground hover:text-foreground"
-                  >
+                  <button onClick={() => handleCopy(link.affiliateUrl!)} className="shrink-0 text-muted-foreground hover:text-foreground">
                     <Copy size={12} />
                   </button>
                 </div>
@@ -313,31 +273,22 @@ export default function LinksPage() {
                 <Trash2 size={15} />
               </Button>
               {confirmDeleteId === link.id && (
-                <span className="text-xs text-destructive whitespace-nowrap">Click again to delete</span>
+                <span className="text-xs text-destructive whitespace-nowrap">Nhấn lần nữa để xóa</span>
               )}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>{totalElements} links</span>
           <div className="flex items-center gap-2">
-            <Button
-              size="icon" variant="outline" disabled={page === 0}
-              onClick={() => setPage(p => p - 1)}
-            >
+            <Button size="icon" variant="outline" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
               <ChevronLeft size={15} />
             </Button>
-            <span className="text-xs px-2">
-              Trang {page + 1} / {totalPages}
-            </span>
-            <Button
-              size="icon" variant="outline" disabled={page >= totalPages - 1}
-              onClick={() => setPage(p => p + 1)}
-            >
+            <span className="text-xs px-2">Trang {page + 1} / {totalPages}</span>
+            <Button size="icon" variant="outline" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
               <ChevronRight size={15} />
             </Button>
           </div>

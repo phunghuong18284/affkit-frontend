@@ -13,9 +13,9 @@ const PAGE_SIZE = 9
 
 function StatusBadge({ status }: { status: CampaignStatus }) {
   const map = {
-    UPCOMING: { label: 'Sap dien ra', className: 'bg-yellow-500/20 text-yellow-400' },
-    ACTIVE:   { label: 'Dang chay',   className: 'bg-green-500/20 text-green-400' },
-    ENDED:    { label: 'Da ket thuc', className: 'bg-muted text-muted-foreground' },
+    UPCOMING: { label: 'Sắp diễn ra', className: 'bg-yellow-500/20 text-yellow-400' },
+    ACTIVE:   { label: 'Đang chạy',   className: 'bg-green-500/20 text-green-400' },
+    ENDED:    { label: 'Đã kết thúc', className: 'bg-muted text-muted-foreground' },
   }
   const { label, className } = map[status] ?? map.ENDED
   return (
@@ -78,12 +78,12 @@ export default function CampaignsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Campaigns</h2>
-          <p className="text-sm text-muted-foreground">Quan ly campaign affiliate cua ban</p>
+          <h2 className="text-xl font-semibold text-foreground">Chiến dịch</h2>
+          <p className="text-sm text-muted-foreground">Quản lý chiến dịch affiliate của bạn</p>
         </div>
         <Button className="gap-2" onClick={() => setModalOpen(true)}>
           <Plus size={16} />
-          Tao campaign
+          Tạo chiến dịch
         </Button>
       </div>
 
@@ -97,14 +97,14 @@ export default function CampaignsPage() {
 
       {isError && (
         <div className="text-center py-12 text-sm text-destructive">
-          Cannot load campaigns. Please try again.
+          Không thể tải danh sách chiến dịch. Vui lòng thử lại.
         </div>
       )}
 
       {!isLoading && !isError && campaigns.length === 0 && (
         <div className="text-center py-16 border border-dashed border-border rounded-lg">
-          <p className="text-muted-foreground text-sm">No campaigns yet.</p>
-          <p className="text-muted-foreground text-xs mt-1">Click Tao campaign to start</p>
+          <p className="text-muted-foreground text-sm">Chưa có chiến dịch nào.</p>
+          <p className="text-muted-foreground text-xs mt-1">Nhấn "Tạo chiến dịch" để bắt đầu</p>
         </div>
       )}
 
@@ -135,7 +135,7 @@ export default function CampaignsPage() {
                 </span>
                 <span className="flex items-center gap-1">
                   <MousePointerClick size={12} />
-                  {campaign.totalClicks ?? 0} clicks
+                  {campaign.totalClicks ?? 0} lượt click
                 </span>
               </div>
 
@@ -146,7 +146,7 @@ export default function CampaignsPage() {
 
               <div className="flex items-center justify-end gap-2 pt-1">
                 {confirmDeleteId === campaign.id && (
-                  <span className="text-xs text-destructive">Click again to delete</span>
+                  <span className="text-xs text-destructive">Nhấn lần nữa để xóa</span>
                 )}
                 <Button
                   size="sm" variant="ghost"
@@ -154,7 +154,7 @@ export default function CampaignsPage() {
                   className="gap-1 text-xs text-muted-foreground"
                 >
                   <Pencil size={13} />
-                  Edit
+                  Sửa
                 </Button>
                 <Button
                   size="sm" variant="ghost" disabled={isDeleting}
@@ -162,7 +162,7 @@ export default function CampaignsPage() {
                   className={`gap-1 text-xs ${confirmDeleteId === campaign.id ? 'text-destructive hover:text-destructive' : 'text-muted-foreground'}`}
                 >
                   <Trash2 size={13} />
-                  Delete
+                  Xóa
                 </Button>
               </div>
             </div>
@@ -172,7 +172,7 @@ export default function CampaignsPage() {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{totalElements} campaigns</span>
+          <span>{totalElements} chiến dịch</span>
           <div className="flex items-center gap-2">
             <Button size="icon" variant="outline" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
               <ChevronLeft size={15} />

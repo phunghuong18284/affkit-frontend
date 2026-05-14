@@ -9,72 +9,72 @@ const plans = [
   {
     key: 'FREE',
     name: 'Free',
-    price: '0d',
+    price: '0đ',
     period: '',
-    description: 'Dung thu, khong can the',
+    description: 'Dùng thử, không cần thẻ',
     icon: Sparkles,
     borderColor: 'border-zinc-700',
     badge: null,
-    features: ['10 links toi da', '1.000 clicks/thang', 'Short link co ban', 'Analytics 7 ngay'],
-    missing: ['Affiliate dashboard', 'Deal Post Generator', 'Telegram Bot', 'Uu tien ho tro'],
-    cta: 'Dang dung',
+    features: ['30 links tối đa', '1.000 clicks/tháng', 'Short link cơ bản', 'Analytics 7 ngày'],
+    missing: ['Affiliate dashboard', 'Deal Post Generator', 'Telegram Bot', 'Ưu tiên hỗ trợ'],
+    cta: 'Đang dùng',
     ctaDisabled: true,
   },
   {
     key: 'PRO',
     name: 'Pro',
-    price: '99.000d',
-    period: '/thang',
-    description: 'Danh cho affiliate ca nhan',
+    price: '99.000đ',
+    period: '/tháng',
+    description: 'Dành cho affiliate cá nhân',
     icon: Zap,
     borderColor: 'border-violet-500',
-    badge: 'Pho bien nhat',
+    badge: 'Phổ biến nhất',
     features: [
-      'Khong gioi han links',
-      'Khong gioi han clicks',
-      'Analytics 90 ngay',
-      'Affiliate dashboard (2 san)',
-      'Deal Post Generator (50 posts/thang)',
+      'Không giới hạn links',
+      'Không giới hạn clicks',
+      'Analytics 90 ngày',
+      'Affiliate dashboard (2 sàn)',
+      'Deal Post Generator (50 posts/tháng)',
       'Telegram Bot',
-      'Ho tro uu tien',
+      'Hỗ trợ ưu tiên',
     ],
     missing: [],
-    cta: 'Nang cap Pro',
+    cta: 'Nâng cấp Pro',
     ctaDisabled: false,
   },
   {
     key: 'BUSINESS',
     name: 'Business',
-    price: '299.000d',
-    period: '/thang',
-    description: 'Danh cho KOL va admin nhom',
+    price: '299.000đ',
+    period: '/tháng',
+    description: 'Dành cho KOL và admin nhóm',
     icon: Building2,
     borderColor: 'border-amber-500',
     badge: null,
     features: [
-      'Tat ca tinh nang Pro',
-      'Affiliate dashboard (tat ca san)',
-      'Deal Post Generator (khong gioi han)',
-      'Analytics khong gioi han',
-      'Quan ly nhom (coming soon)',
-      'Ho tro 24/7',
+      'Tất cả tính năng Pro',
+      'Affiliate dashboard (tất cả sàn)',
+      'Deal Post Generator (không giới hạn)',
+      'Analytics không giới hạn',
+      'Quản lý nhóm (sắp ra mắt)',
+      'Hỗ trợ 24/7',
     ],
     missing: [],
-    cta: 'Nang cap Business',
+    cta: 'Nâng cấp Business',
     ctaDisabled: false,
   },
   {
     key: 'ENTERPRISE',
     name: 'Enterprise',
-    price: 'Lien he',
+    price: 'Liên hệ',
     period: '',
-    description: 'Cho shop va doanh nghiep',
+    description: 'Cho shop và doanh nghiệp',
     icon: Crown,
     borderColor: 'border-zinc-600',
     badge: null,
-    features: ['Tat ca tinh nang Business', 'White-label', 'API access', 'SLA uptime', 'Onboarding 1-1'],
+    features: ['Tất cả tính năng Business', 'White-label', 'API access', 'SLA uptime', 'Onboarding 1-1'],
     missing: [],
-    cta: 'Lien he tu van',
+    cta: 'Liên hệ tư vấn',
     ctaDisabled: false,
   },
 ]
@@ -90,7 +90,7 @@ export default function BillingPage() {
   return (
     <div className="max-w-6xl mx-auto py-8 px-4">
       <div className="mb-10">
-        <h1 className="text-2xl font-bold text-white mb-1">Nang cap tai khoan</h1>
+        <h1 className="text-2xl font-bold text-white mb-1">Nâng cấp tài khoản</h1>
         <p className="text-zinc-400 text-sm">
           Plan hien tai: <span className="text-white font-medium">{currentPlan}</span>
           {currentPlan === 'FREE' && (
@@ -123,7 +123,7 @@ export default function BillingPage() {
               {isCurrentPlan && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="bg-zinc-700 text-zinc-200 text-xs font-medium px-3 py-1 rounded-full whitespace-nowrap">
-                    Plan hien tai
+                    kế hoạch hiện tại
                   </span>
                 </div>
               )}
@@ -185,10 +185,10 @@ export default function BillingPage() {
       </div>
 
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-white font-semibold mb-1">Can ho tro hoac muon nang cap ngay?</p>
+       <div>
+          <p className="text-white font-semibold mb-1">Cần hỗ trợ hoặc muốn nâng cấp ngay?</p>
           <p className="text-zinc-400 text-sm">
-            Thanh toan tu dong dang phat trien. Lien he Telegram de nang cap thu cong trong 5 phut.
+            Thanh toán tự động đang phát triển. Liên hệ Telegram để nâng cấp thủ công trong 5 phút.
           </p>
         </div>
         <a

@@ -25,16 +25,15 @@ export function LoginForm() {
   })
 
   const onSubmit = (data: LoginInput) => {
-    console.log('submitting', data)
     login(data)
   }
 
   return (
     <Card className="border-border bg-card">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Dang nhap</CardTitle>
+        <CardTitle className="text-2xl font-bold">Đăng nhập</CardTitle>
         <CardDescription>
-          Nhap email va mat khau de truy cap dashboard
+          Nhập email và mật khẩu để truy cập trang quản lý
         </CardDescription>
       </CardHeader>
 
@@ -57,9 +56,9 @@ export function LoginForm() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Mat khau</Label>
+              <Label htmlFor="password">Mật khẩu</Label>
               <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                Quen mat khau?
+                Quên mật khẩu?
               </Link>
             </div>
             <div className="relative">
@@ -90,17 +89,17 @@ export function LoginForm() {
             {isLoggingIn ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Dang dang nhap...
+                Đang đăng nhập...
               </>
             ) : (
-              'Dang nhap'
+              'Đăng nhập'
             )}
           </Button>
 
           <p className="text-sm text-center text-muted-foreground">
-            Chua co tai khoan?{' '}
+            Chưa có tài khoản?{' '}
             <Link href="/register" className="text-primary font-medium hover:underline">
-              Dang ky mien phi
+              Đăng ký miễn phí
             </Link>
           </p>
         </CardFooter>

@@ -10,7 +10,6 @@ import { MousePointerClick, Link2, TrendingUp, Zap } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAnalyticsOverview, type AnalyticsPeriod } from '@/hooks/useAnalytics'
 
-// ── Constants ──────────────────────────────────────
 const PERIODS: { label: string; value: AnalyticsPeriod }[] = [
   { label: 'Hôm nay', value: 'today' },
   { label: '7 ngày',  value: '7d' },
@@ -28,7 +27,6 @@ const SOURCE_COLORS: Record<string, string> = {
 
 const DEVICE_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#6b7280']
 
-// ── Stat Card ──────────────────────────────────────
 function StatCard({ icon: Icon, label, value, isLoading }: {
   icon: React.ElementType
   label: string
@@ -49,17 +47,15 @@ function StatCard({ icon: Icon, label, value, isLoading }: {
   )
 }
 
-// ── Main ───────────────────────────────────────────
 export default function AnalyticsPage() {
   const [period, setPeriod] = useState<AnalyticsPeriod>('30d')
   const { data, isLoading, isError } = useAnalyticsOverview(period)
 
   return (
     <div className="space-y-6">
-      {/* ── Header + Period selector ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Analytics</h2>
+          <h2 className="text-xl font-semibold text-foreground">Thống kê</h2>
           <p className="text-sm text-muted-foreground">Thống kê click và hiệu suất link</p>
         </div>
         <div className="flex gap-1 bg-muted rounded-lg p-1">
@@ -79,22 +75,19 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      {/* ── Error ── */}
       {isError && (
         <div className="text-center py-12 text-sm text-destructive border border-dashed border-border rounded-lg">
-          Không thể tải dữ liệu analytics. Vui lòng thử lại.
+          Không thể tải dữ liệu thống kê. Vui lòng thử lại.
         </div>
       )}
 
-      {/* ── Stats Grid ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={MousePointerClick} label="Tổng clicks"     value={data?.summary.totalClicks.toLocaleString('vi-VN') ?? 0} isLoading={isLoading} />
-        <StatCard icon={Link2}            label="Tổng links"       value={data?.summary.totalLinks ?? 0}    isLoading={isLoading} />
-        <StatCard icon={Zap}              label="Nguồn chính"      value={data?.summary.topSource ?? '—'}   isLoading={isLoading} />
-        <StatCard icon={TrendingUp}       label="Tăng trưởng"      value={`${data?.summary.growthPercent ?? 0}%`} isLoading={isLoading} />
+        <StatCard icon={MousePointerClick} label="Tổng clicks"  value={data?.summary.totalClicks.toLocaleString('vi-VN') ?? 0} isLoading={isLoading} />
+        <StatCard icon={Link2}            label="Tổng links"    value={data?.summary.totalLinks ?? 0}    isLoading={isLoading} />
+        <StatCard icon={Zap}              label="Nguồn chính"   value={data?.summary.topSource ?? '—'}   isLoading={isLoading} />
+        <StatCard icon={TrendingUp}       label="Tăng trưởng"   value={`${data?.summary.growthPercent ?? 0}%`} isLoading={isLoading} />
       </div>
 
-      {/* ── Clicks by Day Chart ── */}
       <div className="p-4 border border-border rounded-lg bg-card space-y-4">
         <h3 className="text-sm font-semibold text-foreground">Clicks theo ngày</h3>
         {isLoading ? (
@@ -125,10 +118,7 @@ export default function AnalyticsPage() {
         )}
       </div>
 
-      {/* ── Source + Device ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {/* Source Breakdown */}
         <div className="p-4 border border-border rounded-lg bg-card space-y-4">
           <h3 className="text-sm font-semibold text-foreground">Nguồn traffic</h3>
           {isLoading ? (
@@ -158,7 +148,6 @@ export default function AnalyticsPage() {
           )}
         </div>
 
-        {/* Device Breakdown */}
         <div className="p-4 border border-border rounded-lg bg-card space-y-4">
           <h3 className="text-sm font-semibold text-foreground">Thiết bị</h3>
           {isLoading ? (
