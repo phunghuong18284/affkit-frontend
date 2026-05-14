@@ -6,17 +6,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/dashboard',
-        permanent: false,
-      },
-    ]
-  },
-
   async headers() {
     return [
       {
