@@ -70,7 +70,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-zinc-400 text-lg mb-8 max-w-xl mx-auto leading-relaxed">
-            Rút gọn link, theo dõi analytics, auto-convert sang affiliate link Shopee / Lazada / Tiki — tất cả trong một nơi.
+            Rút gọn link, theo dõi analytics, auto-convert sang affiliate link Shopee / Lazada / Tiki / TikTok Shop — tất cả trong một nơi.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
