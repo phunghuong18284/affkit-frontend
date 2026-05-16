@@ -19,7 +19,7 @@ interface Transaction {
 }
 
 interface CommissionData {
-  totalCount: number
+  total: number
   data: Transaction[]
 }
 
