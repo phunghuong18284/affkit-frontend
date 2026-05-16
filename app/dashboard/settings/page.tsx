@@ -6,7 +6,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Key, CheckCircle2, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,9 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProfile, useUpdateProfile, useChangePassword } from '@/hooks/useProfile'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import api from '@/lib/api'
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -51,9 +54,13 @@ const PLAN_VARIANT: Record<string, 'secondary' | 'default' | 'destructive'> = {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const { data: profile, isLoading } = useProfile()
+  const { data: profile, isLoading, refetch } = useProfile()
   const updateProfile = useUpdateProfile()
   const changePassword = useChangePassword()
+
+  const [apiKey, setApiKey] = useState('')
+  const [savingKey, setSavingKey] = useState(false)
+  const [deletingKey, setDeletingKey] = useState(false)
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -81,6 +88,37 @@ export default function SettingsPage() {
     }
   }
 
+  async function onSaveApiKey() {
+    if (!apiKey.trim()) {
+      toast.error('Vui lòng nhập API key')
+      return
+    }
+    setSavingKey(true)
+    try {
+      await api.put('/users/me/accesstrade-key', { apiKey: apiKey.trim() })
+      toast.success('Đã lưu API key AccessTrade')
+      setApiKey('')
+      refetch()
+    } catch {
+      toast.error('Lưu API key thất bại')
+    } finally {
+      setSavingKey(false)
+    }
+  }
+
+  async function onDeleteApiKey() {
+    setDeletingKey(true)
+    try {
+      await api.delete('/users/me/accesstrade-key')
+      toast.success('Đã xóa API key AccessTrade')
+      refetch()
+    } catch {
+      toast.error('Xóa API key thất bại')
+    } finally {
+      setDeletingKey(false)
+    }
+  }
+
   // ─── Loading skeleton ──────────────────────────────────────────────────────
 
   if (isLoading) {
@@ -89,11 +127,13 @@ export default function SettingsPage() {
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-52 w-full" />
         <Skeleton className="h-72 w-full" />
+        <Skeleton className="h-48 w-full" />
       </div>
     )
   }
 
   const plan = profile?.plan ?? 'FREE'
+  const hasApiKey = profile?.hasAccessTradeKey ?? false
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -209,6 +249,59 @@ export default function SettingsPage() {
               Đổi mật khẩu
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* ── Card AccessTrade ───────────────────────────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key size={18} />
+            Kết nối AccessTrade
+          </CardTitle>
+          <CardDescription>
+            Nhập API key AccessTrade của bạn để xem hoa hồng trực tiếp trong AffKit
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {hasApiKey ? (
+            <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={16} className="text-emerald-400" />
+                <span className="text-sm text-emerald-400 font-medium">Đã kết nối AccessTrade</span>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onDeleteApiKey}
+                disabled={deletingKey}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                {deletingKey ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                <span className="ml-1">Xóa</span>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="apiKey">API Key AccessTrade</Label>
+                <Input
+                  id="apiKey"
+                  type="password"
+                  placeholder="Dán API key từ pub2.accesstrade.vn vào đây..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Lấy API key tại: pub2.accesstrade.vn → Tools → API → Access Key
+              </p>
+              <Button onClick={onSaveApiKey} disabled={savingKey || !apiKey.trim()}>
+                {savingKey && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Lưu API key
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

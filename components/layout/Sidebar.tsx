@@ -5,18 +5,21 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Link2, Calendar,
   BarChart2, Settings, LogOut, Sparkles, CreditCard,
+  HelpCircle, DollarSign,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 
 const NAV_ITEMS = [
-  { href: '/dashboard',           icon: LayoutDashboard, label: 'Tổng quan' },
-  { href: '/dashboard/links',     icon: Link2,           label: 'Links' },
-  { href: '/dashboard/campaigns', icon: Calendar,        label: 'Chiến dịch' },
-  { href: '/dashboard/analytics', icon: BarChart2,       label: 'Thống kê' },
-  { href: '/dashboard/posts',     icon: Sparkles,        label: 'Bài đăng deals' },
-  { href: '/dashboard/billing',   icon: CreditCard,      label: 'Thanh toán' },
-  { href: '/dashboard/settings',  icon: Settings,        label: 'Cài đặt' },
+  { href: '/dashboard',                icon: LayoutDashboard, label: 'Tổng quan' },
+  { href: '/dashboard/links',          icon: Link2,           label: 'Links' },
+  { href: '/dashboard/campaigns',      icon: Calendar,        label: 'Chiến dịch' },
+  { href: '/dashboard/analytics',      icon: BarChart2,       label: 'Thống kê' },
+  { href: '/dashboard/posts',          icon: Sparkles,        label: 'Bài đăng deals' },
+  { href: '/dashboard/commissions',    icon: DollarSign,      label: 'Hoa hồng' },
+  { href: '/dashboard/billing',        icon: CreditCard,      label: 'Thanh toán' },
+  { href: '/dashboard/settings',       icon: Settings,        label: 'Cài đặt' },
+  { href: '/dashboard/help',           icon: HelpCircle,      label: 'Hỗ trợ' },
 ]
 
 export function Sidebar() {
@@ -34,7 +37,7 @@ export function Sidebar() {
         </Link>
       </div>
 
-      <nav className="flex-1 py-4 space-y-1 px-2">
+      <nav className="flex-1 py-4 space-y-1 px-2 overflow-y-auto">
         {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
           const isActive = href === '/dashboard'
             ? pathname === '/dashboard'

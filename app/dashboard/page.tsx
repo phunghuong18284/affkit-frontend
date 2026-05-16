@@ -80,7 +80,7 @@ export default function DashboardPage() {
           icon={Link2}
           label="Tổng links"
           value={totalLinks}
-          sub={`Giới hạn: ${user?.plan === 'FREE' ? '10' : '∞'}`}
+          sub={`Giới hạn: ${user?.plan === 'FREE' ? '30' : '∞'}`}
           isLoading={isLoading}
         />
         <StatCard
