@@ -69,14 +69,13 @@ export default function CommissionsPage() {
 
   const hasApiKey = profile?.hasAccessTradeKey ?? false
 
-  // Chưa kết nối AccessTrade
   if (!isLoading && !hasApiKey) {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto">
           <DollarSign size={28} className="text-zinc-500" />
         </div>
-        <h2 className="text-xl font-bold text-white">Chưa kết nối AccessTrade</h2>
+        <h2 className="text-xl font-bold text-white">Đã kết nối AccessTrade</h2>
         <p className="text-zinc-400 text-sm max-w-sm mx-auto">
           Nhập API key AccessTrade vào phần Cài đặt để xem hoa hồng của bạn ngay trong AffKit.
         </p>
@@ -85,7 +84,7 @@ export default function CommissionsPage() {
           Đi đến Cài đặt
         </Button>
         <div className="pt-2">
-          
+          <a
             href="https://pub2.accesstrade.vn"
             target="_blank"
             rel="noopener noreferrer"
@@ -99,7 +98,6 @@ export default function CommissionsPage() {
     )
   }
 
-  // Lỗi API key sai
   if (isError) {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
@@ -129,7 +127,6 @@ export default function CommissionsPage() {
         <p className="text-zinc-400 text-sm">Dữ liệu từ AccessTrade — cập nhật theo thời gian thực</p>
       </div>
 
-      {/* Stat cards */}
       {isLoading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
@@ -171,7 +168,6 @@ export default function CommissionsPage() {
         </div>
       )}
 
-      {/* Bảng giao dịch */}
       <div className="rounded-2xl border border-zinc-800 overflow-hidden">
         <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-white">Giao dịch gần đây</h2>
