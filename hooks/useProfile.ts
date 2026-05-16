@@ -10,7 +10,7 @@ export function useProfile() {
     queryKey: ['profile'],
     queryFn: async () => {
       const res = await api.get('/users/me')
-      return res as unknown as UserProfile
+      return res.data.data as UserProfile
     },
     staleTime: 5 * 60 * 1000,
   })
@@ -21,7 +21,7 @@ export function useUpdateProfile() {
   return useMutation({
     mutationFn: async (data: UpdateProfileRequest) => {
       const res = await api.patch('/users/me', data)
-      return res as unknown as UserProfile
+      return res.data.data as UserProfile
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['profile'] })
