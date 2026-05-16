@@ -75,7 +75,7 @@ export default function CommissionsPage() {
         <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto">
           <DollarSign size={28} className="text-zinc-500" />
         </div>
-        <h2 className="text-xl font-bold text-white">Đã kết nối AccessTrade</h2>
+        <h2 className="text-xl font-bold text-white">Chưa kết nối AccessTrade</h2>
         <p className="text-zinc-400 text-sm max-w-sm mx-auto">
           Nhập API key AccessTrade vào phần Cài đặt để xem hoa hồng của bạn ngay trong AffKit.
         </p>
