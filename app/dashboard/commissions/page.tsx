@@ -23,7 +23,7 @@ interface CommissionData {
   data: Transaction[]
 }
 
-function useCommissions() {
+function useCommissions(enabled: boolean) {
   return useQuery<CommissionData>({
     queryKey: ['commissions'],
     queryFn: async () => {
@@ -31,6 +31,7 @@ function useCommissions() {
       return res.data.data
     },
     retry: false,
+    enabled,
   })
 }
 
@@ -64,12 +65,13 @@ function StatusBadge({ status }: { status: number }) {
 
 export default function CommissionsPage() {
   const router = useRouter()
-  const { data: profile } = useProfile()
-  const { data, isLoading, isError } = useCommissions()
-
+  const { data: profile, isLoading: profileLoading } = useProfile()
   const hasApiKey = profile?.hasAccessTradeKey ?? false
+  const { data, isLoading, isError } = useCommissions(hasApiKey)
 
- if (!isLoading && profile && !hasApiKey) {
+  if (profileLoading) return null
+
+  if (!hasApiKey) {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto">
@@ -84,7 +86,7 @@ export default function CommissionsPage() {
           Đi đến Cài đặt
         </Button>
         <div className="pt-2">
-          <a
+          
             href="https://pub2.accesstrade.vn"
             target="_blank"
             rel="noopener noreferrer"
