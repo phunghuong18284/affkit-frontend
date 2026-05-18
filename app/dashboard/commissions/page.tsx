@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { DollarSign, Clock, CheckCircle2, XCircle, Settings, ExternalLink, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
