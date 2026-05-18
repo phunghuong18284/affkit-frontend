@@ -18,8 +18,7 @@ import { useProfile, useUpdateProfile, useChangePassword } from '@/hooks/useProf
 import { useState } from 'react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
-
-// ─── Schemas ──────────────────────────────────────────────────────────────────
+import { useQueryClient } from '@tanstack/react-query'
 
 const profileSchema = z.object({
   fullName: z.string().min(2, 'Tối thiểu 2 ký tự').max(50, 'Tối đa 50 ký tự'),
@@ -37,8 +36,6 @@ const passwordSchema = z.object({
 type ProfileForm = z.infer<typeof profileSchema>
 type PasswordForm = z.infer<typeof passwordSchema>
 
-// ─── Plan badge ───────────────────────────────────────────────────────────────
-
 const PLAN_LABEL: Record<string, string> = {
   FREE: 'Free',
   PRO: 'Pro',
@@ -51,12 +48,11 @@ const PLAN_VARIANT: Record<string, 'secondary' | 'default' | 'destructive'> = {
   BUSINESS: 'destructive',
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function SettingsPage() {
-  const { data: profile, isLoading, refetch } = useProfile()
+  const { data: profile, isLoading } = useProfile()
   const updateProfile = useUpdateProfile()
   const changePassword = useChangePassword()
+  const queryClient = useQueryClient()
 
   const [apiKey, setApiKey] = useState('')
   const [savingKey, setSavingKey] = useState(false)
@@ -98,7 +94,7 @@ export default function SettingsPage() {
       await api.put('/users/me/accesstrade-key', { apiKey: apiKey.trim() })
       toast.success('Đã lưu API key AccessTrade')
       setApiKey('')
-      refetch()
+      await queryClient.invalidateQueries({ queryKey: ['profile'] })
     } catch {
       toast.error('Lưu API key thất bại')
     } finally {
@@ -111,15 +107,13 @@ export default function SettingsPage() {
     try {
       await api.delete('/users/me/accesstrade-key')
       toast.success('Đã xóa API key AccessTrade')
-      refetch()
+      await queryClient.invalidateQueries({ queryKey: ['profile'] })
     } catch {
       toast.error('Xóa API key thất bại')
     } finally {
       setDeletingKey(false)
     }
   }
-
-  // ─── Loading skeleton ──────────────────────────────────────────────────────
 
   if (isLoading) {
     return (
@@ -137,8 +131,6 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Cài đặt</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -146,7 +138,6 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* ── Card profile ──────────────────────────────────────────────────── */}
       <Card>
         <CardHeader>
           <CardTitle>Thông tin cá nhân</CardTitle>
@@ -186,7 +177,6 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* ── Card đổi mật khẩu ─────────────────────────────────────────────── */}
       <Card>
         <CardHeader>
           <CardTitle>Đổi mật khẩu</CardTitle>
@@ -252,7 +242,6 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* ── Card AccessTrade ───────────────────────────────────────────────── */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -304,7 +293,6 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
-
     </div>
   )
 }
