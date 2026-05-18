@@ -69,7 +69,7 @@ export default function CommissionsPage() {
 
   const hasApiKey = profile?.hasAccessTradeKey ?? false
 
-  if (!isLoading && !hasApiKey) {
+ if (!isLoading && profile && !hasApiKey) {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
         <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto">
