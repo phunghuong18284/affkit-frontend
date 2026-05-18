@@ -12,7 +12,7 @@ export function useProfile() {
       const res = await api.get('/users/me')
       return res.data.data as UserProfile
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0, // Luôn luôn lấy dữ liệu mới nhất khi component mount
   })
 }
 
