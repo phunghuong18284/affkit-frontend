@@ -10,9 +10,10 @@ export function useProfile() {
     queryKey: ['profile'],
     queryFn: async () => {
       const res = await api.get('/users/me')
-      return res.data.data as UserProfile
+      return res as UserProfile      
     },
     staleTime: 0, // Luôn luôn lấy dữ liệu mới nhất khi component mount
+    refetchOnMount: 'always',
   })
 }
 
