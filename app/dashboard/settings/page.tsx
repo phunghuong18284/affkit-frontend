@@ -6,7 +6,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Loader2, Key, CheckCircle2, Trash2 } from 'lucide-react'
+import { Loader2, Key, CheckCircle2, Trash2, Send } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProfile, useUpdateProfile, useChangePassword } from '@/hooks/useProfile'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
 import { useQueryClient } from '@tanstack/react-query'
@@ -58,6 +58,12 @@ export default function SettingsPage() {
   const [savingKey, setSavingKey] = useState(false)
   const [deletingKey, setDeletingKey] = useState(false)
 
+  const [telegramLinked, setTelegramLinked] = useState(false)
+  const [telegramCode, setTelegramCode] = useState<string | null>(null)
+  const [telegramLoading, setTelegramLoading] = useState(false)
+  const [countdown, setCountdown] = useState(0)
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
     values: { fullName: profile?.fullName ?? '' },
@@ -67,6 +73,56 @@ export default function SettingsPage() {
     resolver: zodResolver(passwordSchema),
     defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
   })
+
+  useEffect(() => {
+    async function fetchTelegramStatus() {
+      try {
+        const res = await api.get('/users/me/telegram-status')
+        const data = res as any
+        setTelegramLinked(data.linked === true)
+      } catch {
+        // ignore
+      }
+    }
+    fetchTelegramStatus()
+  }, [])
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      if (countdownRef.current) clearInterval(countdownRef.current)
+      return
+    }
+    countdownRef.current = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(countdownRef.current!)
+          setTelegramCode(null)
+          return 0
+        }
+        return c - 1
+      })
+    }, 1000)
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current)
+    }
+  }, [countdown])
+
+  async function onGenerateTelegramCode() {
+    setTelegramLoading(true)
+    try {
+      const res = await api.post('/users/me/telegram-link', {})
+      const data = res as any
+      setTelegramCode(data.code)
+      setCountdown(600)
+    } catch {
+      toast.error('Không tạo được mã liên kết')
+    } finally {
+      setTelegramLoading(false)
+    }
+  }
+
+  const minutes = Math.floor(countdown / 60)
+  const seconds = countdown % 60
 
   async function onUpdateProfile(data: ProfileForm) {
     await updateProfile.mutateAsync(data as any)
@@ -80,7 +136,7 @@ export default function SettingsPage() {
       })
       passwordForm.reset()
     } catch {
-      // error toast đã xử lý trong hook
+      // error toast handled in hook
     }
   }
 
@@ -121,6 +177,7 @@ export default function SettingsPage() {
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-52 w-full" />
         <Skeleton className="h-72 w-full" />
+        <Skeleton className="h-48 w-full" />
         <Skeleton className="h-48 w-full" />
       </div>
     )
@@ -199,9 +256,7 @@ export default function SettingsPage() {
                 </p>
               )}
             </div>
-
             <Separator />
-
             <div className="space-y-2">
               <Label htmlFor="newPassword">Mật khẩu mới</Label>
               <Input
@@ -217,7 +272,6 @@ export default function SettingsPage() {
                 </p>
               )}
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Xác nhận mật khẩu mới</Label>
               <Input
@@ -233,7 +287,6 @@ export default function SettingsPage() {
                 </p>
               )}
             </div>
-
             <Button type="submit" disabled={changePassword.isPending}>
               {changePassword.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Đổi mật khẩu
@@ -290,6 +343,65 @@ export default function SettingsPage() {
                 {savingKey && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Lưu API key
               </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Send size={18} />
+            Liên kết Telegram
+          </CardTitle>
+          <CardDescription>
+            Liên kết tài khoản Telegram để bot dùng đúng API key của bạn
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {telegramLinked ? (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <CheckCircle2 size={16} className="text-emerald-400" />
+              <span className="text-sm text-emerald-400 font-medium">Đã liên kết Telegram</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {telegramCode ? (
+                <div className="space-y-3">
+                  <div className="p-4 rounded-lg bg-muted text-center space-y-1">
+                    <p className="text-xs text-muted-foreground">Mã liên kết của bạn</p>
+                    <p className="text-3xl font-bold tracking-widest">{telegramCode}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Hết hạn sau {minutes}:{seconds.toString().padStart(2, '0')}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg border text-sm space-y-1">
+                    <p className="font-medium">Hướng dẫn:</p>
+                    <p className="text-muted-foreground">
+                      1. Mở Telegram, tìm <span className="font-mono font-medium">@affkit_vn_bot</span>
+                    </p>
+                    <p className="text-muted-foreground">
+                      2. Gửi lệnh: <span className="font-mono font-medium">/link {telegramCode}</span>
+                    </p>
+                    <p className="text-muted-foreground">
+                      3. Bot sẽ xác nhận liên kết thành công
+                    </p>
+                  </div>
+                  <Button variant="outline" onClick={onGenerateTelegramCode} disabled={telegramLoading}>
+                    Tạo mã mới
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Nhấn nút bên dưới để tạo mã liên kết, sau đó gửi mã vào bot Telegram.
+                  </p>
+                  <Button onClick={onGenerateTelegramCode} disabled={telegramLoading}>
+                    {telegramLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Tạo mã liên kết
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
