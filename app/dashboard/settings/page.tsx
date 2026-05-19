@@ -276,7 +276,8 @@ export default function SettingsPage() {
                 <Label htmlFor="apiKey">API Key AccessTrade</Label>
                 <Input
                   id="apiKey"
-                  type="password"
+                  type="text"
+                  autoComplete="off"
                   placeholder="Dán API key từ pub2.accesstrade.vn vào đây..."
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
