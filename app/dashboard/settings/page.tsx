@@ -61,6 +61,7 @@ export default function SettingsPage() {
   const [telegramLinked, setTelegramLinked] = useState(false)
   const [telegramCode, setTelegramCode] = useState<string | null>(null)
   const [telegramLoading, setTelegramLoading] = useState(false)
+  const [unlinkingTelegram, setUnlinkingTelegram] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -118,6 +119,21 @@ export default function SettingsPage() {
       toast.error('Không tạo được mã liên kết')
     } finally {
       setTelegramLoading(false)
+    }
+  }
+
+  async function onUnlinkTelegram() {
+    setUnlinkingTelegram(true)
+    try {
+      await api.delete('/users/me/telegram-link')
+      setTelegramLinked(false)
+      setTelegramCode(null)
+      setCountdown(0)
+      toast.success('Đã hủy liên kết Telegram')
+    } catch {
+      toast.error('Hủy liên kết thất bại')
+    } finally {
+      setUnlinkingTelegram(false)
     }
   }
 
@@ -360,9 +376,21 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {telegramLinked ? (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-              <CheckCircle2 size={16} className="text-emerald-400" />
-              <span className="text-sm text-emerald-400 font-medium">Đã liên kết Telegram</span>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={16} className="text-emerald-400" />
+                <span className="text-sm text-emerald-400 font-medium">Đã liên kết Telegram</span>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onUnlinkTelegram}
+                disabled={unlinkingTelegram}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                {unlinkingTelegram ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                <span className="ml-1">Hủy liên kết</span>
+              </Button>
             </div>
           ) : (
             <div className="space-y-4">
