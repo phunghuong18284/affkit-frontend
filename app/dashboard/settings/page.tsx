@@ -214,10 +214,19 @@ export default function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Thông tin cá nhân</CardTitle>
-          <CardDescription className="flex items-center gap-2 flex-wrap">
+            <CardDescription className="flex items-center gap-2 flex-wrap">
             <span>{profile?.email}</span>
             <span>·</span>
             <Badge variant={PLAN_VARIANT[plan]}>{PLAN_LABEL[plan]}</Badge>
+            {plan === 'PRO' && profile?.planExpiresAt && (
+              <span className={`text-xs ${
+                new Date(profile.planExpiresAt).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000
+                  ? 'text-yellow-500'
+                  : 'text-muted-foreground'
+              }`}>
+                · Hết hạn: {new Date(profile.planExpiresAt).toLocaleDateString('vi-VN')}
+              </span>
+            )}
             {!profile?.emailVerified && (
               <span className="text-yellow-600 text-xs">⚠ Email chưa xác nhận</span>
             )}

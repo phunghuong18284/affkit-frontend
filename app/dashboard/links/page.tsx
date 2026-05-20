@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Copy, Trash2, ExternalLink, Search, Pencil, BarChart2, ChevronLeft, ChevronRight, Zap, Link2, Save, QrCode, Download } from 'lucide-react'
+import { Plus, Copy, Trash2, ExternalLink, Search, Pencil, BarChart2, ChevronLeft, ChevronRight, Zap, Link2, Save, QrCode, Download, Layers } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
@@ -9,13 +9,21 @@ import { QRCodeSVG } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Textarea } from '@/components/ui/textarea'
 import { CreateLinkModal } from '@/components/links/CreateLinkModal'
 import { EditLinkModal } from '@/components/links/EditLinkModal'
 import { PlanLimitBanner } from '@/components/layout/PlanLimitBanner'
 import { useLinks, useDeleteLink, useCreateLink, type LinkResponse } from '@/hooks/useLinks'
 import { useConvertLink } from '@/hooks/useConvertLink'
+import api from '@/lib/api'
 
 const PAGE_SIZE = 10
+
+type BulkResult = {
+  originalUrl: string
+  affiliateUrl: string
+  status: 'success' | 'unsupported' | 'error'
+}
 
 function PlatformBadge({ platform }: { platform: string | null }) {
   if (!platform) return null
@@ -31,6 +39,14 @@ function PlatformBadge({ platform }: { platform: string | null }) {
       {platform.toUpperCase()}
     </span>
   )
+}
+
+function detectPlatform(url: string): string {
+  if (url.includes('shopee.vn')) return 'SHOPEE'
+  if (url.includes('lazada.vn')) return 'LAZADA'
+  if (url.includes('tiki.vn')) return 'TIKI'
+  if (url.includes('tiktok.com')) return 'TIKTOK'
+  return 'OTHER'
 }
 
 function LinkRowSkeleton() {
@@ -57,6 +73,12 @@ export default function LinksPage() {
   const [convertUrl, setConvertUrl] = useState('')
   const [linkSaved, setLinkSaved] = useState(false)
   const [qrLink, setQrLink] = useState<LinkResponse | null>(null)
+
+  const [bulkUrls, setBulkUrls] = useState('')
+  const [bulkResults, setBulkResults] = useState<BulkResult[]>([])
+  const [isBulkConverting, setIsBulkConverting] = useState(false)
+  const [isSavingAll, setIsSavingAll] = useState(false)
+  const [showBulk, setShowBulk] = useState(false)
 
   const { data, isLoading, isError } = useLinks({ search: search || undefined, page, size: PAGE_SIZE })
   const { mutate: deleteLink, isPending: isDeleting } = useDeleteLink()
@@ -136,6 +158,67 @@ export default function LinksPage() {
     toast.success('Đã xuất CSV!')
   }
 
+  const handleBulkConvert = async () => {
+    const urls = bulkUrls
+      .split('\n')
+      .map(u => u.trim())
+      .filter(u => u.startsWith('http://') || u.startsWith('https://'))
+
+    if (urls.length === 0) {
+      toast.error('Vui lòng nhập ít nhất 1 link hợp lệ')
+      return
+    }
+
+    setIsBulkConverting(true)
+    setBulkResults([])
+    try {
+      const res = await api.post('/links/bulk-convert', { urls }) as any
+      const data = Array.isArray(res) ? res : res.data ?? res
+      setBulkResults(data)
+    } catch {
+      toast.error('Convert hàng loạt thất bại')
+    } finally {
+      setIsBulkConverting(false)
+    }
+  }
+
+  const handleCopyAllBulk = () => {
+    const successLinks = bulkResults
+      .filter(r => r.status === 'success')
+      .map(r => r.affiliateUrl)
+      .join('\n')
+    if (!successLinks) {
+      toast.error('Không có link nào thành công')
+      return
+    }
+    navigator.clipboard.writeText(successLinks)
+    toast.success('Đã copy tất cả affiliate links!')
+  }
+
+  const handleSaveAllBulk = async () => {
+    const successResults = bulkResults.filter(r => r.status === 'success')
+    if (successResults.length === 0) {
+      toast.error('Không có link nào để lưu')
+      return
+    }
+    setIsSavingAll(true)
+    let saved = 0
+    for (const r of successResults) {
+      try {
+        await createLink({
+          originalUrl: r.originalUrl,
+          title: detectPlatform(r.originalUrl) + ' link',
+          affiliateUrl: r.affiliateUrl,
+        })
+        saved++
+      } catch {
+        // bo qua neu loi
+      }
+    }
+    setIsSavingAll(false)
+    toast.success(`Đã lưu ${saved}/${successResults.length} links vào danh sách!`)
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -146,7 +229,7 @@ export default function LinksPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" className="gap-2" onClick={handleExportCSV}>
             <Download size={16} />
-            Export CSV
+            Xuất CSV
           </Button>
           <Button className="gap-2" onClick={() => setModalOpen(true)}>
             <Plus size={16} />
@@ -158,61 +241,133 @@ export default function LinksPage() {
       <PlanLimitBanner />
 
       <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <Zap size={16} className="text-yellow-400" />
-          <span className="text-sm font-medium text-foreground">Convert sang Affiliate Link</span>
-          <span className="text-xs text-muted-foreground">(Tiki, Lazada, TikTok)</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Zap size={16} className="text-yellow-400" />
+            <span className="text-sm font-medium text-foreground">Convert sang Affiliate Link</span>
+            <span className="text-xs text-muted-foreground">(Tiki, Lazada, TikTok)</span>
+          </div>
+          <Button
+            size="sm"
+            variant={showBulk ? 'default' : 'outline'}
+            className="gap-1 text-xs"
+            onClick={() => { setShowBulk(!showBulk); setBulkResults([]) }}
+          >
+            <Layers size={13} />
+            Convert hàng loạt
+          </Button>
         </div>
 
-        {!convertResult ? (
-          <div className="flex gap-2">
-            <Input
-              placeholder="Dán link Tiki / Lazada / TikTok vào đây..."
-              value={convertUrl}
-              onChange={(e) => {
-                setConvertUrl(e.target.value)
-                if (convertError) resetConvert()
-              }}
-              onKeyDown={(e) => e.key === 'Enter' && handleConvert()}
-              className="flex-1"
-            />
-            <Button
-              onClick={handleConvert}
-              disabled={isConverting || !convertUrl.trim()}
-              className="gap-2 shrink-0"
-            >
-              {isConverting ? <span className="animate-spin">⟳</span> : <Link2 size={15} />}
-              {isConverting ? 'Đang convert...' : 'Convert'}
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 bg-background rounded-md px-3 py-2 border border-border">
-              <PlatformBadge platform={convertResult.platform} />
-              <span className="text-sm text-blue-400 flex-1 truncate">{convertResult.affiliateUrl}</span>
-              <Button size="sm" variant="outline" onClick={() => handleCopy(convertResult.affiliateUrl)} className="shrink-0 gap-1">
-                <Copy size={13} />
-                Copy
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground truncate max-w-[60%]">
-                Từ: {convertResult.originalUrl}
-              </span>
-              <div className="flex items-center gap-2">
-                <Button size="sm" onClick={handleSaveAsNewLink} disabled={isCreating || linkSaved} className="gap-1 shrink-0">
-                  <Save size={13} />
-                  {linkSaved ? 'Đã lưu!' : isCreating ? 'Đang lưu...' : 'Lưu vào danh sách'}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={handleConvertReset} className="text-xs h-7">
-                  Convert link khác
+        {!showBulk ? (
+          <>
+            {!convertResult ? (
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Dán link Tiki / Lazada / TikTok vào đây..."
+                  value={convertUrl}
+                  onChange={(e) => {
+                    setConvertUrl(e.target.value)
+                    if (convertError) resetConvert()
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleConvert()}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleConvert}
+                  disabled={isConverting || !convertUrl.trim()}
+                  className="gap-2 shrink-0"
+                >
+                  {isConverting ? <span className="animate-spin">⟳</span> : <Link2 size={15} />}
+                  {isConverting ? 'Đang convert...' : 'Convert'}
                 </Button>
               </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 bg-background rounded-md px-3 py-2 border border-border">
+                  <PlatformBadge platform={convertResult.platform} />
+                  <span className="text-sm text-blue-400 flex-1 truncate">{convertResult.affiliateUrl}</span>
+                  <Button size="sm" variant="outline" onClick={() => handleCopy(convertResult.affiliateUrl)} className="shrink-0 gap-1">
+                    <Copy size={13} />
+                    Copy
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground truncate max-w-[60%]">
+                    Từ: {convertResult.originalUrl}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" onClick={handleSaveAsNewLink} disabled={isCreating || linkSaved} className="gap-1 shrink-0">
+                      <Save size={13} />
+                      {linkSaved ? 'Đã lưu!' : isCreating ? 'Đang lưu...' : 'Lưu vào danh sách'}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={handleConvertReset} className="text-xs h-7">
+                      Convert link khác
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {convertError && <p className="text-xs text-destructive">{convertError}</p>}
+          </>
+        ) : (
+          <div className="space-y-3">
+            <Textarea
+              placeholder="Dán nhiều link vào đây, mỗi dòng 1 link..."
+              value={bulkUrls}
+              onChange={(e) => setBulkUrls(e.target.value)}
+              rows={4}
+              className="font-mono text-xs"
+            />
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                onClick={handleBulkConvert}
+                disabled={isBulkConverting || !bulkUrls.trim()}
+                className="gap-2"
+              >
+                {isBulkConverting ? <span className="animate-spin">⟳</span> : <Layers size={15} />}
+                {isBulkConverting ? 'Đang convert...' : 'Convert hàng loạt'}
+              </Button>
+              {bulkResults.length > 0 && (
+                <>
+                  <Button size="sm" variant="outline" onClick={handleCopyAllBulk} className="gap-1">
+                    <Copy size={13} />
+                    Copy tất cả
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={handleSaveAllBulk} disabled={isSavingAll} className="gap-1">
+                    <Save size={13} />
+                    {isSavingAll ? 'Đang lưu...' : 'Lưu tất cả vào danh sách'}
+                  </Button>
+                </>
+              )}
             </div>
+
+            {bulkResults.length > 0 && (
+              <div className="space-y-2 mt-2">
+                <p className="text-xs text-muted-foreground">
+                  {bulkResults.filter(r => r.status === 'success').length}/{bulkResults.length} link thành công
+                </p>
+                {bulkResults.map((r, idx) => (
+                  <div key={idx} className="flex items-center gap-2 p-2 rounded-md bg-background border border-border">
+                    <span className="text-xs text-muted-foreground w-5 shrink-0">{idx + 1}.</span>
+                    {r.status === 'success' ? (
+                      <>
+                        <PlatformBadge platform={detectPlatform(r.originalUrl)} />
+                        <span className="text-xs text-green-400 flex-1 truncate">{r.affiliateUrl}</span>
+                        <button onClick={() => handleCopy(r.affiliateUrl)} className="shrink-0 text-muted-foreground hover:text-foreground">
+                          <Copy size={12} />
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-xs text-destructive flex-1 truncate">
+                        {r.status === 'unsupported' ? '[Sàn chưa hỗ trợ]' : '[Lỗi]'} {r.originalUrl}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-
-        {convertError && <p className="text-xs text-destructive">{convertError}</p>}
       </div>
 
       <div className="relative">
