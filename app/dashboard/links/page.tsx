@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Copy, Trash2, ExternalLink, Search, Pencil, BarChart2, ChevronLeft, ChevronRight, Zap, Link2, Save } from 'lucide-react'
+import { Plus, Copy, Trash2, ExternalLink, Search, Pencil, BarChart2, ChevronLeft, ChevronRight, Zap, Link2, Save, QrCode, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { QRCodeSVG } from 'qrcode.react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -55,6 +56,7 @@ export default function LinksPage() {
   const [editingLink, setEditingLink] = useState<LinkResponse | null>(null)
   const [convertUrl, setConvertUrl] = useState('')
   const [linkSaved, setLinkSaved] = useState(false)
+  const [qrLink, setQrLink] = useState<LinkResponse | null>(null)
 
   const { data, isLoading, isError } = useLinks({ search: search || undefined, page, size: PAGE_SIZE })
   const { mutate: deleteLink, isPending: isDeleting } = useDeleteLink()
@@ -107,6 +109,33 @@ export default function LinksPage() {
     setLinkSaved(true)
   }
 
+  const handleExportCSV = () => {
+    if (links.length === 0) {
+      toast.error('Không có link nào để xuất')
+      return
+    }
+    const headers = ['Title', 'Original URL', 'Short URL', 'Affiliate URL', 'Platform', 'Clicks']
+    const rows = links.map(l => [
+      l.title ?? '',
+      l.originalUrl ?? '',
+      l.shortUrl ?? '',
+      l.affiliateUrl ?? '',
+      l.platform ?? '',
+      String(l.totalClicks ?? 0),
+    ])
+    const csv = [headers, ...rows]
+      .map(row => row.map(v => `"${v.replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `affkit-links-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Đã xuất CSV!')
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -114,10 +143,16 @@ export default function LinksPage() {
           <h2 className="text-xl font-semibold text-foreground">Links</h2>
           <p className="text-sm text-muted-foreground">Quản lý link rút gọn của bạn</p>
         </div>
-        <Button className="gap-2" onClick={() => setModalOpen(true)}>
-          <Plus size={16} />
-          Tạo link mới
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleExportCSV}>
+            <Download size={16} />
+            Export CSV
+          </Button>
+          <Button className="gap-2" onClick={() => setModalOpen(true)}>
+            <Plus size={16} />
+            Tạo link mới
+          </Button>
+        </div>
       </div>
 
       <PlanLimitBanner />
@@ -191,7 +226,7 @@ export default function LinksPage() {
       </div>
 
       <div className="rounded-lg border border-border overflow-hidden">
-        <div className="grid grid-cols-[1fr_140px_80px_200px_160px] gap-4 px-4 py-2 bg-muted/50 text-xs text-muted-foreground font-medium">
+        <div className="grid grid-cols-[1fr_140px_80px_200px_180px] gap-4 px-4 py-2 bg-muted/50 text-xs text-muted-foreground font-medium">
           <span>LINK</span>
           <span>SHORT URL</span>
           <span>LƯỢT CLICK</span>
@@ -217,7 +252,7 @@ export default function LinksPage() {
         {links.map((link) => (
           <div
             key={link.id}
-            className="grid grid-cols-[1fr_140px_80px_200px_160px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-muted/30 transition-colors"
+            className="grid grid-cols-[1fr_140px_80px_200px_180px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-muted/30 transition-colors"
           >
             <div className="min-w-0">
               <div className="flex items-center gap-2">
@@ -259,6 +294,9 @@ export default function LinksPage() {
                   <ExternalLink size={15} />
                 </a>
               </Button>
+              <Button size="icon" variant="ghost" onClick={() => setQrLink(link)}>
+                <QrCode size={15} />
+              </Button>
               <Button size="icon" variant="ghost" onClick={() => router.push(`/dashboard/links/${link.id}`)}>
                 <BarChart2 size={15} />
               </Button>
@@ -290,6 +328,29 @@ export default function LinksPage() {
             <span className="text-xs px-2">Trang {page + 1} / {totalPages}</span>
             <Button size="icon" variant="outline" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
               <ChevronRight size={15} />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {qrLink && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setQrLink(null)}
+        >
+          <div
+            className="bg-background border border-border rounded-lg p-6 flex flex-col items-center gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm font-medium">QR Code</p>
+            <QRCodeSVG value={qrLink.shortUrl} size={200} />
+            <p className="text-xs text-muted-foreground">{qrLink.shortUrl}</p>
+            <Button size="sm" variant="outline" className="w-full" onClick={() => handleCopy(qrLink.shortUrl)}>
+              <Copy size={12} className="mr-1" />
+              Copy link
+            </Button>
+            <Button size="sm" variant="ghost" className="w-full" onClick={() => setQrLink(null)}>
+              Đóng
             </Button>
           </div>
         </div>
