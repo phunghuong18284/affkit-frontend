@@ -59,8 +59,7 @@ export default function LandingPage() {
             <span className="text-violet-400">đến thu nhập ổn định</span>
           </h1>
           <p className="text-zinc-400 text-lg mb-4 max-w-xl mx-auto leading-relaxed">
-            Tự động convert link Shopee, Lazada, Tiki, TikTok Shop sang affiliate link của bạn.
-            Theo dõi click, xem hoa hồng, tạo bài đăng deal — tất cả trong một nơi.
+            Tự động convert link Shopee, Lazada, Tiki, TikTok Shop, Nguyễn Kim, JUNO, Vascara và nhiều sàn khác sang affiliate link của bạn.
           </p>
           {/* Stats bar */}
           <div className="flex items-center justify-center gap-6 mb-8 text-sm">
