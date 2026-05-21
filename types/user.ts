@@ -9,6 +9,15 @@ export interface UserProfile {
   createdAt: string
   linksUsed: number
   linksLimit: number
+  hasAccessTradeKey: boolean
+  planStartedAt: string | null
+  planExpiresAt: string | null
+
+  // Quota mới
+  dealPostUsed: number
+  dealPostLimit: number
+  telegramConvertUsed: number
+  telegramConvertLimit: number
 }
 
 export interface UpdateProfileRequest {
