@@ -54,9 +54,9 @@ export default function LandingPage() {
             <Sparkles size={12} />
             Công cụ #1 cho affiliate Việt Nam
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight mb-5">
-            Nền tảng affiliate cho người làm nghiêm túc —<br />
-            <span className="text-violet-400">tự động, minh bạch, không bỏ sót doanh thu</span>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-5">
+            Quản lý affiliate link thông minh{' '}
+            <span className="text-violet-400">cho người Việt.</span>
           </h1>
           <p className="text-zinc-400 text-lg mb-4 max-w-xl mx-auto leading-relaxed">
             Tự động convert link Shopee, Lazada, Tiki, TikTok Shop, Nguyễn Kim, JUNO, Vascara và nhiều sàn khác sang affiliate link của bạn.
