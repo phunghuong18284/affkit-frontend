@@ -190,9 +190,9 @@ export default function LinksPage() {
           // bo qua neu loi
         }
       }
-      if (saved > 0) toast.success(`\u0110\u00e3 l\u01b0u ${saved} link v\u00e0o danh s\u00e1ch!`)
+      if (saved > 0) toast.success(`Đã lưu ${saved} link vào danh sách!`)
     } catch {
-      toast.error('Convert h\u00e0ng lo\u1ea1t th\u1ea5t b\u1ea1i')
+      toast.error('Convert hàng loạt thất bại')
     } finally {
       setIsBulkConverting(false)
     }
@@ -204,11 +204,11 @@ export default function LinksPage() {
       .map(r => r.affiliateUrl)
       .join('\n')
     if (!successLinks) {
-      toast.error('Kh\u00f4ng c\u00f3 link n\u00e0o th\u00e0nh c\u00f4ng')
+      toast.error('Không có link nào thành công')
       return
     }
     navigator.clipboard.writeText(successLinks)
-    toast.success('\u0110\u00e3 copy t\u1ea5t c\u1ea3 affiliate links!')
+    toast.success('Đã copy tất cả affiliate links!')
   }
 
   return (
@@ -216,16 +216,16 @@ export default function LinksPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-foreground">Links</h2>
-          <p className="text-sm text-muted-foreground">Qu\u1ea3n l\u00fd link r\u00fat g\u1ecdn c\u1ee7a b\u1ea1n</p>
+          <p className="text-sm text-muted-foreground">Quản lý link rút gọn của bạn</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" className="gap-2" onClick={handleExportCSV}>
             <Download size={16} />
-            Xu\u1ea5t CSV
+            Xuất CSV
           </Button>
           <Button className="gap-2" onClick={() => setModalOpen(true)}>
             <Plus size={16} />
-            T\u1ea1o link m\u1edbi
+            Tạo link mới
           </Button>
         </div>
       </div>
@@ -246,7 +246,7 @@ export default function LinksPage() {
             onClick={() => { setShowBulk(!showBulk); setBulkResults([]) }}
           >
             <Layers size={13} />
-            Convert h\u00e0ng lo\u1ea1t
+            Convert hàng loạt
           </Button>
         </div>
 
@@ -255,7 +255,7 @@ export default function LinksPage() {
             {!convertResult ? (
               <div className="flex gap-2">
                 <Input
-                  placeholder="D\u00e1n link Tiki / Lazada / TikTok v\u00e0o \u0111\u00e2y..."
+                  placeholder="Dán link Tiki / Lazada / TikTok vào đây..."
                   value={convertUrl}
                   onChange={(e) => {
                     setConvertUrl(e.target.value)
@@ -269,8 +269,8 @@ export default function LinksPage() {
                   disabled={isConverting || !convertUrl.trim()}
                   className="gap-2 shrink-0"
                 >
-                  {isConverting ? <span className="animate-spin">\u27f3</span> : <Link2 size={15} />}
-                  {isConverting ? '\u0110ang convert...' : 'Convert'}
+                  {isConverting ? <span className="animate-spin">&#x27F3;</span> : <Link2 size={15} />}
+                  {isConverting ? 'Đang convert...' : 'Convert'}
                 </Button>
               </div>
             ) : (
@@ -285,14 +285,14 @@ export default function LinksPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground truncate max-w-[60%]">
-                    T\u1eeb: {convertResult.originalUrl}
+                    Từ: {convertResult.originalUrl}
                   </span>
                   <div className="flex items-center gap-2">
                     <Button size="sm" onClick={handleSaveAsNewLink} disabled={isCreating || linkSaved} className="gap-1 shrink-0">
-                      {linkSaved ? '\u0110\u00e3 l\u01b0u!' : isCreating ? '\u0110ang l\u01b0u...' : 'L\u01b0u v\u00e0o danh s\u00e1ch'}
+                      {linkSaved ? 'Đã lưu!' : isCreating ? 'Đang lưu...' : 'Lưu vào danh sách'}
                     </Button>
                     <Button size="sm" variant="ghost" onClick={handleConvertReset} className="text-xs h-7">
-                      Convert link kh\u00e1c
+                      Convert link khác
                     </Button>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ export default function LinksPage() {
         ) : (
           <div className="space-y-3">
             <Textarea
-              placeholder="D\u00e1n nhi\u1ec1u link v\u00e0o \u0111\u00e2y, m\u1ed7i d\u00f2ng 1 link..."
+              placeholder="Dán nhiều link vào đây, mỗi dòng 1 link..."
               value={bulkUrls}
               onChange={(e) => setBulkUrls(e.target.value)}
               rows={4}
@@ -315,13 +315,13 @@ export default function LinksPage() {
                 disabled={isBulkConverting || !bulkUrls.trim()}
                 className="gap-2"
               >
-                {isBulkConverting ? <span className="animate-spin">\u27f3</span> : <Layers size={15} />}
-                {isBulkConverting ? '\u0110ang convert v\u00e0 l\u01b0u...' : 'Convert h\u00e0ng lo\u1ea1t'}
+                {isBulkConverting ? <span className="animate-spin">&#x27F3;</span> : <Layers size={15} />}
+                {isBulkConverting ? 'Đang convert và lưu...' : 'Convert hàng loạt'}
               </Button>
               {bulkResults.length > 0 && (
                 <Button size="sm" variant="outline" onClick={handleCopyAllBulk} className="gap-1">
                   <Copy size={13} />
-                  Copy t\u1ea5t c\u1ea3
+                  Copy tất cả
                 </Button>
               )}
             </div>
@@ -329,7 +329,7 @@ export default function LinksPage() {
             {bulkResults.length > 0 && (
               <div className="space-y-2 mt-2">
                 <p className="text-xs text-muted-foreground">
-                  {bulkResults.filter(r => r.status === 'success').length}/{bulkResults.length} link th\u00e0nh c\u00f4ng \u2014 \u0111\u00e3 l\u01b0u v\u00e0o danh s\u00e1ch
+                  {bulkResults.filter(r => r.status === 'success').length}/{bulkResults.length} link thành công — đã lưu vào danh sách
                 </p>
                 {bulkResults.map((r, idx) => (
                   <div key={idx} className="flex items-center gap-2 p-2 rounded-md bg-background border border-border">
@@ -344,7 +344,7 @@ export default function LinksPage() {
                       </>
                     ) : (
                       <span className="text-xs text-destructive flex-1 truncate">
-                        {r.status === 'unsupported' ? '[\u0110\u01b0\u1ee3c s\u00e0n ch\u01b0a h\u1ed7 tr\u1ee3]' : '[L\u1ed7i]'} {r.originalUrl}
+                        {r.status === 'unsupported' ? '[Sàn chưa hỗ trợ]' : '[Lỗi]'} {r.originalUrl}
                       </span>
                     )}
                   </div>
@@ -358,7 +358,7 @@ export default function LinksPage() {
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="T\u00ecm ki\u1ebfm link..."
+          placeholder="Tìm kiếm link..."
           className="pl-9"
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
@@ -369,7 +369,7 @@ export default function LinksPage() {
         <div className="grid grid-cols-[1fr_140px_80px_200px_180px] gap-4 px-4 py-2 bg-muted/50 text-xs text-muted-foreground font-medium">
           <span>LINK</span>
           <span>SHORT URL</span>
-          <span>L\u01af\u1ee2T CLICK</span>
+          <span>LƯỢT CLICK</span>
           <span>AFFILIATE</span>
           <span></span>
         </div>
@@ -378,14 +378,14 @@ export default function LinksPage() {
 
         {isError && (
           <div className="text-center py-12 text-sm text-destructive">
-            Kh\u00f4ng th\u1ec3 t\u1ea3i danh s\u00e1ch link. Vui l\u00f2ng th\u1eed l\u1ea1i.
+            Không thể tải danh sách link. Vui lòng thử lại.
           </div>
         )}
 
         {!isLoading && !isError && links.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-muted-foreground text-sm">Ch\u01b0a c\u00f3 link n\u00e0o.</p>
-            <p className="text-muted-foreground text-xs mt-1">Nh\u1ea5n "+ T\u1ea1o link m\u1edbi" \u0111\u1ec3 b\u1eaft \u0111\u1ea7u</p>
+            <p className="text-muted-foreground text-sm">Chưa có link nào.</p>
+            <p className="text-muted-foreground text-xs mt-1">Nhấn "+ Tạo link mới" để bắt đầu</p>
           </div>
         )}
 
@@ -397,7 +397,7 @@ export default function LinksPage() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-foreground truncate">
-                  {link.title ?? 'Ch\u01b0a c\u00f3 ti\u00eau \u0111\u1ec1'}
+                  {link.title ?? 'Chưa có tiêu đề'}
                 </span>
                 <PlatformBadge platform={link.platform} />
               </div>
@@ -424,7 +424,7 @@ export default function LinksPage() {
                   </button>
                 </div>
               ) : (
-                <span className="text-xs text-muted-foreground">\u2014</span>
+                <span className="text-xs text-muted-foreground">&mdash;</span>
               )}
             </div>
 
@@ -451,7 +451,7 @@ export default function LinksPage() {
                 <Trash2 size={15} />
               </Button>
               {confirmDeleteId === link.id && (
-                <span className="text-xs text-destructive whitespace-nowrap">Nh\u1ea5n l\u1ea7n n\u1eefa \u0111\u1ec3 x\u00f3a</span>
+                <span className="text-xs text-destructive whitespace-nowrap">Nhấn lần nữa để xóa</span>
               )}
             </div>
           </div>
@@ -490,7 +490,7 @@ export default function LinksPage() {
               Copy link
             </Button>
             <Button size="sm" variant="ghost" className="w-full" onClick={() => setQrLink(null)}>
-              \u0110\u00f3ng
+              Đóng
             </Button>
           </div>
         </div>
