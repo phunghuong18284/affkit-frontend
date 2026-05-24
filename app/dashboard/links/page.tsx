@@ -28,11 +28,15 @@ type BulkResult = {
 function PlatformBadge({ platform }: { platform: string | null }) {
   if (!platform) return null
   const colors: Record<string, string> = {
-    SHOPEE:   'bg-orange-500/20 text-orange-400',
-    LAZADA:   'bg-blue-500/20 text-blue-400',
-    TIKTOK:   'bg-pink-500/20 text-pink-400',
-    FACEBOOK: 'bg-blue-600/20 text-blue-300',
-    TIKI:     'bg-blue-400/20 text-blue-300',
+    SHOPEE:      'bg-orange-500/20 text-orange-400',
+    LAZADA:      'bg-blue-500/20 text-blue-400',
+    TIKTOK:      'bg-pink-500/20 text-pink-400',
+    FACEBOOK:    'bg-blue-600/20 text-blue-300',
+    TIKI:        'bg-blue-400/20 text-blue-300',
+    NGUYEN_KIM:  'bg-yellow-500/20 text-yellow-400',
+    'NGUYEN KIM': 'bg-yellow-500/20 text-yellow-400',
+    VASCARA:     'bg-purple-500/20 text-purple-400',
+    JUNO:        'bg-rose-500/20 text-rose-400',
   }
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors[platform] ?? 'bg-muted text-muted-foreground'}`}>
@@ -46,7 +50,26 @@ function detectPlatform(url: string): string {
   if (url.includes('lazada.vn')) return 'LAZADA'
   if (url.includes('tiki.vn')) return 'TIKI'
   if (url.includes('tiktok.com')) return 'TIKTOK'
+  if (url.includes('nguyenkim.com')) return 'NGUYEN_KIM'
+  if (url.includes('vascara.com')) return 'VASCARA'
+  if (url.includes('juno.vn')) return 'JUNO'
   return 'OTHER'
+}
+
+function getDisplayShortUrl(shortUrl: string, platform: string | null): string {
+  const code = shortUrl?.split('/').pop() ?? ''
+  const subdomainMap: Record<string, string> = {
+    SHOPEE:     'shopee',
+    LAZADA:     'lazada',
+    TIKI:       'tiki',
+    TIKTOK:     'tiktok',
+    NGUYEN_KIM: 'nguyenkim',
+    'NGUYEN KIM': 'nguyenkim',
+    VASCARA:    'vascara',
+    JUNO:       'juno',
+  }
+  const subdomain = subdomainMap[platform ?? ''] ?? 'go'
+  return `https://${subdomain}.affkit.vn/${code}`
 }
 
 function LinkRowSkeleton() {
@@ -139,7 +162,7 @@ export default function LinksPage() {
     const rows = links.map(l => [
       l.title ?? '',
       l.originalUrl ?? '',
-      l.shortUrl ?? '',
+      getDisplayShortUrl(l.shortUrl, l.platform),
       l.affiliateUrl ?? '',
       l.platform ?? '',
       String(l.totalClicks ?? 0),
@@ -175,7 +198,6 @@ export default function LinksPage() {
       const results: BulkResult[] = Array.isArray(res) ? res : res.data ?? res
       setBulkResults(results)
 
-      // Tu dong luu tat ca link thanh cong vao danh sach
       const successResults = results.filter(r => r.status === 'success')
       let saved = 0
       for (const r of successResults) {
@@ -329,7 +351,7 @@ export default function LinksPage() {
             {bulkResults.length > 0 && (
               <div className="space-y-2 mt-2">
                 <p className="text-xs text-muted-foreground">
-                  {bulkResults.filter(r => r.status === 'success').length}/{bulkResults.length} link thành công — đã lưu vào danh sách
+                  {bulkResults.filter(r => r.status === 'success').length}/{bulkResults.length} link thành công
                 </p>
                 {bulkResults.map((r, idx) => (
                   <div key={idx} className="flex items-center gap-2 p-2 rounded-md bg-background border border-border">
@@ -366,11 +388,10 @@ export default function LinksPage() {
       </div>
 
       <div className="rounded-lg border border-border overflow-hidden">
-        <div className="grid grid-cols-[1fr_140px_80px_200px_180px] gap-4 px-4 py-2 bg-muted/50 text-xs text-muted-foreground font-medium">
+        <div className="grid grid-cols-[1fr_220px_80px_180px] gap-4 px-4 py-2 bg-muted/50 text-xs text-muted-foreground font-medium">
           <span>LINK</span>
-          <span>SHORT URL</span>
+          <span>LINK RÚT GỌN</span>
           <span>LƯỢT CLICK</span>
-          <span>AFFILIATE</span>
           <span></span>
         </div>
 
@@ -385,77 +406,65 @@ export default function LinksPage() {
         {!isLoading && !isError && links.length === 0 && (
           <div className="text-center py-16">
             <p className="text-muted-foreground text-sm">Chưa có link nào.</p>
-            <p className="text-muted-foreground text-xs mt-1">Nhấn "+ Tạo link mới" để bắt đầu</p>
+            <p className="text-muted-foreground text-xs mt-1">Nhan "+ Tạo link mới" de bat dau</p>
           </div>
         )}
 
-        {links.map((link) => (
-          <div
-            key={link.id}
-            className="grid grid-cols-[1fr_140px_80px_200px_180px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-muted/30 transition-colors"
-          >
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-foreground truncate">
-                  {link.title ?? 'Chưa có tiêu đề'}
-                </span>
-                <PlatformBadge platform={link.platform} />
-              </div>
-              <span className="text-xs text-muted-foreground truncate block">{link.originalUrl}</span>
-            </div>
-
-            <div className="flex items-center gap-1 min-w-0">
-              <span className="text-xs text-blue-400 truncate">{link.shortUrl ?? link.shortCode}</span>
-              <button onClick={() => handleCopy(link.shortUrl)} className="shrink-0 text-muted-foreground hover:text-foreground">
-                <Copy size={13} />
-              </button>
-            </div>
-
-            <span className="text-sm text-foreground">{link.totalClicks ?? 0}</span>
-
-            <div className="min-w-0">
-              {link.affiliateUrl ? (
-                <div className="flex items-center gap-1">
-                  <a href={link.affiliateUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-green-400 truncate hover:underline block max-w-[160px]">
-                    {link.affiliateUrl}
-                  </a>
-                  <button onClick={() => handleCopy(link.affiliateUrl!)} className="shrink-0 text-muted-foreground hover:text-foreground">
-                    <Copy size={12} />
-                  </button>
+        {links.map((link) => {
+          const displayUrl = getDisplayShortUrl(link.shortUrl, link.platform)
+          return (
+            <div
+              key={link.id}
+              className="grid grid-cols-[1fr_220px_80px_180px] gap-4 px-4 py-3 border-t border-border items-center hover:bg-muted/30 transition-colors"
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground truncate">
+                    {link.title ?? 'Chưa có tiêu đề'}
+                  </span>
+                  <PlatformBadge platform={link.platform} />
                 </div>
-              ) : (
-                <span className="text-xs text-muted-foreground">&mdash;</span>
-              )}
-            </div>
+                <span className="text-xs text-muted-foreground truncate block">{link.originalUrl}</span>
+              </div>
 
-            <div className="flex items-center gap-1 justify-end">
-              <Button size="icon" variant="ghost" asChild>
-                <a href={link.shortUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink size={15} />
-                </a>
-              </Button>
-              <Button size="icon" variant="ghost" onClick={() => setQrLink(link)}>
-                <QrCode size={15} />
-              </Button>
-              <Button size="icon" variant="ghost" onClick={() => router.push(`/dashboard/links/${link.id}`)}>
-                <BarChart2 size={15} />
-              </Button>
-              <Button size="icon" variant="ghost" onClick={() => setEditingLink(link)}>
-                <Pencil size={15} />
-              </Button>
-              <Button
-                size="icon" variant="ghost" disabled={isDeleting}
-                onClick={() => handleDelete(link.id)}
-                className={confirmDeleteId === link.id ? 'text-destructive hover:text-destructive' : ''}
-              >
-                <Trash2 size={15} />
-              </Button>
-              {confirmDeleteId === link.id && (
-                <span className="text-xs text-destructive whitespace-nowrap">Nhấn lần nữa để xóa</span>
-              )}
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="text-xs text-blue-400 truncate">{displayUrl}</span>
+                <button onClick={() => handleCopy(displayUrl)} className="shrink-0 text-muted-foreground hover:text-foreground">
+                  <Copy size={13} />
+                </button>
+              </div>
+
+              <span className="text-sm text-foreground">{link.totalClicks ?? 0}</span>
+
+              <div className="flex items-center gap-1 justify-end">
+                <Button size="icon" variant="ghost" asChild>
+                  <a href={displayUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink size={15} />
+                  </a>
+                </Button>
+                <Button size="icon" variant="ghost" onClick={() => setQrLink(link)}>
+                  <QrCode size={15} />
+                </Button>
+                <Button size="icon" variant="ghost" onClick={() => router.push(`/dashboard/links/${link.id}`)}>
+                  <BarChart2 size={15} />
+                </Button>
+                <Button size="icon" variant="ghost" onClick={() => setEditingLink(link)}>
+                  <Pencil size={15} />
+                </Button>
+                <Button
+                  size="icon" variant="ghost" disabled={isDeleting}
+                  onClick={() => handleDelete(link.id)}
+                  className={confirmDeleteId === link.id ? 'text-destructive hover:text-destructive' : ''}
+                >
+                  <Trash2 size={15} />
+                </Button>
+                {confirmDeleteId === link.id && (
+                  <span className="text-xs text-destructive whitespace-nowrap">Nhấn lần nữa để xóa</span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {totalPages > 1 && (
@@ -483,9 +492,9 @@ export default function LinksPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-sm font-medium">QR Code</p>
-            <QRCodeSVG value={qrLink.shortUrl} size={200} />
-            <p className="text-xs text-muted-foreground">{qrLink.shortUrl}</p>
-            <Button size="sm" variant="outline" className="w-full" onClick={() => handleCopy(qrLink.shortUrl)}>
+            <QRCodeSVG value={getDisplayShortUrl(qrLink.shortUrl, qrLink.platform)} size={200} />
+            <p className="text-xs text-muted-foreground">{getDisplayShortUrl(qrLink.shortUrl, qrLink.platform)}</p>
+            <Button size="sm" variant="outline" className="w-full" onClick={() => handleCopy(getDisplayShortUrl(qrLink.shortUrl, qrLink.platform))}>
               <Copy size={12} className="mr-1" />
               Copy link
             </Button>
