@@ -359,8 +359,8 @@ export default function LinksPage() {
                     {r.status === 'success' ? (
                       <>
                         <PlatformBadge platform={detectPlatform(r.originalUrl)} />
-                        <span className="text-xs text-green-400 flex-1 truncate">{r.affiliateUrl}</span>
-                        <button onClick={() => handleCopy(r.affiliateUrl)} className="shrink-0 text-muted-foreground hover:text-foreground">
+                        <span className="text-xs text-green-400 flex-1 truncate">{r.shortUrl ?? r.affiliateUrl}</span>
+                        <button onClick={() => handleCopy(r.shortUrl ?? r.affiliateUrl)} className="shrink-0 text-muted-foreground hover:text-foreground">
                           <Copy size={12} />
                         </button>
                       </>
