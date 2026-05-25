@@ -63,8 +63,8 @@ export function useCreateLink() {
       return res.data ?? res
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: linkKeys.all })
-      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      queryClient.invalidateQueries({ queryKey: linkKeys.all, refetchType: 'none' })
+      queryClient.invalidateQueries({ queryKey: ['profile'], refetchType: 'none' })
       toast.success('Tạo link thành công!')
     },
     onError: (err: any) => {
