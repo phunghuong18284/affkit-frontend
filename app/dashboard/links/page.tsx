@@ -220,18 +220,18 @@ export default function LinksPage() {
     }
   }
 
-  const handleCopyAllBulk = () => {
-    const successLinks = bulkResults
-      .filter(r => r.status === 'success')
-      .map(r => r.affiliateUrl)
-      .join('\n')
-    if (!successLinks) {
-      toast.error('Không có link nào thành công')
-      return
-    }
-    navigator.clipboard.writeText(successLinks)
-    toast.success('Đã copy tất cả affiliate links!')
+const handleCopyAllBulk = () => {
+  const successLinks = bulkResults
+    .filter(r => r.status === 'success')
+    .map(r => r.shortUrl ?? r.affiliateUrl)
+    .join('\n')
+  if (!successLinks) {
+    toast.error('Không có link nào thành công')
+    return
   }
+  navigator.clipboard.writeText(successLinks)
+  toast.success('Đã copy tất cả affiliate links!')
+}
 
   return (
     <div className="space-y-4">
