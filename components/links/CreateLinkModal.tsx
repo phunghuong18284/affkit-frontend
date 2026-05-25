@@ -38,6 +38,19 @@ interface CreateLinkModalProps {
   onOpenChange: (open: boolean) => void
 }
 
+const convertToSubdomain = (shortUrl: string, originalUrl: string): string => {
+  const shortCode = shortUrl.split('/').pop()
+  if (!shortCode) return shortUrl
+  if (originalUrl.includes('shopee.vn'))     return `https://shopee.affkit.vn/${shortCode}`
+  if (originalUrl.includes('lazada.vn'))     return `https://lazada.affkit.vn/${shortCode}`
+  if (originalUrl.includes('tiki.vn'))       return `https://tiki.affkit.vn/${shortCode}`
+  if (originalUrl.includes('tiktok.com'))    return `https://tiktok.affkit.vn/${shortCode}`
+  if (originalUrl.includes('nguyenkim.com')) return `https://nguyenkim.affkit.vn/${shortCode}`
+  if (originalUrl.includes('vascara.com'))   return `https://vascara.affkit.vn/${shortCode}`
+  if (originalUrl.includes('juno.vn'))       return `https://juno.affkit.vn/${shortCode}`
+  return `https://go.affkit.vn/${shortCode}`
+}
+
 export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
   const [createdShortUrl, setCreatedShortUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -64,7 +77,9 @@ export function CreateLinkModal({ open, onOpenChange }: CreateLinkModalProps) {
         campaignId: selectedCampaignId !== 'none' ? selectedCampaignId : undefined,
       })
       const shortUrl = result?.shortUrl ?? result?.data?.shortUrl
-      if (shortUrl) setCreatedShortUrl(shortUrl)
+      if (shortUrl) {
+        setCreatedShortUrl(convertToSubdomain(shortUrl, data.originalUrl))
+      }
     } catch {
       // lỗi đã handle trong hook
     }
