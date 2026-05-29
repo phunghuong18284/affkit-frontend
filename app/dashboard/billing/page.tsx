@@ -29,7 +29,7 @@ const PRO_FEATURES = [
 const BANK_INFO = {
   bank: 'Seabank',
   account: '0942567631',
-  owner: 'PHUNG VAN HUONG',
+  owner: 'NGUYEN THI HUYEN',
   amount: '50.000đ',
 }
 
